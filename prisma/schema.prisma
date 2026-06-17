@@ -7,32 +7,53 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Single white-label brand config (id = "default" for this demo tenant).
-model Brand {
-  id          String  @id @default("default")
-  name        String  @default("Pista")
-  brandHex    String  @default("#7AB04A")
-  darkHex     String  @default("#36511F")
-  font        String  @default("Inter")
-  subdomain   String  @default("pista.app")
-  aiAssistant Boolean @default(true)
-  aiCards     Boolean @default(true)
-  aiUpsell    Boolean @default(true)
-  aiLoyalty   Boolean @default(false)
+// A café / tenant on the Pista platform. Holds its white-label config.
+model Tenant {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique // subdomain label, e.g. "cbtl"
+  status      String   @default("active") // active | trial | suspended
+  plan        String   @default("growth") // starter | growth | enterprise
+  // white-label
+  brandHex    String   @default("#7AB04A")
+  darkHex     String   @default("#36511F")
+  font        String   @default("Inter")
+  // ai feature flags
+  aiAssistant Boolean  @default(true)
+  aiCards     Boolean  @default(true)
+  aiUpsell    Boolean  @default(true)
+  aiLoyalty   Boolean  @default(false)
+  // store info
+  storeName   String?
+  address     String?
+  createdAt   DateTime @default(now())
+
+  categories Category[]
+  items      Item[]
+  orders     Order[]
+  discounts  Discount[]
+  users      User[]
 }
 
 model Category {
-  id    String @id
-  label String
-  sort  Int    @default(0)
-  items Item[]
+  id       String  @id // composite-ish: "<tenant>:<slug>" to stay unique across tenants
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id])
+  key      String  @default("") // logical id within a tenant, e.g. "ice-blended"
+  label    String
+  sort     Int     @default(0)
+  items    Item[]
+
+  @@index([tenantId])
 }
 
 model Item {
   id          String      @id
-  name        String
+  tenantId    String?
+  tenant      Tenant?     @relation(fields: [tenantId], references: [id])
   categoryId  String
   category    Category    @relation(fields: [categoryId], references: [id])
+  name        String
   price       Int
   img         String
   desc        String
@@ -45,50 +66,53 @@ model Item {
   rating      Float       @default(0)
   reviews     Int         @default(0)
   origin      String      @default("")
-  ingredients String      @default("[]") // JSON array
-  allergens   String      @default("[]") // JSON array
-  tags        String      @default("[]") // JSON array
-  sizes       String      @default("[]") // JSON array of {name,price}
+  ingredients String      @default("[]")
+  allergens   String      @default("[]")
+  tags        String      @default("[]")
+  sizes       String      @default("[]")
   aiTip       String      @default("")
   live        Boolean     @default(true)
   sort        Int         @default(0)
   orderItems  OrderItem[]
+
+  @@index([tenantId])
 }
 
 model User {
   id        String   @id @default(cuid())
+  tenantId  String? // null for platform superadmins
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id])
   name      String?
-  email     String   @unique
+  email     String
   password  String
-  role      String   @default("customer") // "customer" | "admin"
+  role      String   @default("customer") // superadmin | owner | staff | customer
   points    Int      @default(120)
   createdAt DateTime @default(now())
   orders    Order[]
-}
 
-model Discount {
-  id        String   @id @default(cuid())
-  code      String   @unique
-  percent   Int
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
+  @@unique([tenantId, email])
+  @@index([tenantId])
 }
 
 model Order {
-  id         String      @id @default(cuid())
-  userId     String
-  user       User        @relation(fields: [userId], references: [id])
+  id           String      @id @default(cuid())
+  tenantId     String?
+  tenant       Tenant?     @relation(fields: [tenantId], references: [id])
+  userId       String
+  user         User        @relation(fields: [userId], references: [id])
   subtotal     Int
   tax          Int
   reward       Int
-  discount     Int        @default(0)
+  discount     Int         @default(0)
   discountCode String?
   total        Int
-  fulfilment String      @default("pickup")
-  payment    String      @default("upi")
-  status     String      @default("preparing")
-  createdAt  DateTime    @default(now())
-  items      OrderItem[]
+  fulfilment   String      @default("pickup")
+  payment      String      @default("upi")
+  status       String      @default("preparing")
+  createdAt    DateTime    @default(now())
+  items        OrderItem[]
+
+  @@index([tenantId])
 }
 
 model OrderItem {
@@ -102,4 +126,17 @@ model OrderItem {
   milk    String?
   unit    Int
   qty     Int
+}
+
+model Discount {
+  id        String   @id @default(cuid())
+  tenantId  String?
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id])
+  code      String
+  percent   Int
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
 }

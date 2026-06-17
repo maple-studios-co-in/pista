@@ -5,7 +5,7 @@ import { prisma, parseItem } from "@/lib/db";
 export const dynamic = "force-dynamic";
 
 function slugify(s) {
-  return String(s).toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60);
+  return String(s).toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 50);
 }
 
 export async function POST(req) {
@@ -18,12 +18,13 @@ export async function POST(req) {
   } catch {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
-  if (!b.name || !b.categoryId) {
-    return NextResponse.json({ error: "Name and category are required." }, { status: 400 });
-  }
+  if (!b.name || !b.categoryId) return NextResponse.json({ error: "Name and category are required." }, { status: 400 });
 
-  let id = b.id || slugify(b.name);
-  // ensure unique id
+  // Category must belong to this tenant.
+  const cat = await prisma.category.findFirst({ where: { id: b.categoryId, tenantId: gate.tenantId } });
+  if (!cat) return NextResponse.json({ error: "Invalid category" }, { status: 400 });
+
+  let id = `${gate.tenantId.slice(-4)}-${slugify(b.name)}`;
   if (await prisma.item.findUnique({ where: { id } })) id = `${id}-${Date.now().toString().slice(-4)}`;
 
   const price = Math.max(0, Number(b.price) || 0);
@@ -32,6 +33,7 @@ export async function POST(req) {
   const item = await prisma.item.create({
     data: {
       id,
+      tenantId: gate.tenantId,
       name: b.name,
       categoryId: b.categoryId,
       price,

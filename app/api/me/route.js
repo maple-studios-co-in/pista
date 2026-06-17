@@ -11,15 +11,12 @@ export async function GET() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { id: true, name: true, email: true, points: true, _count: { select: { orders: true } } },
+    select: { id: true, name: true, email: true, role: true, tenantId: true, points: true, _count: { select: { orders: true } } },
   });
   if (!user) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   return NextResponse.json({
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    points: user.points,
-    orders: user._count.orders,
+    id: user.id, name: user.name, email: user.email, role: user.role,
+    tenantId: user.tenantId, points: user.points, orders: user._count.orders,
   });
 }

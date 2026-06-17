@@ -16,9 +16,12 @@ export async function PATCH(req, { params }) {
   } catch {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
-  if (!ALLOWED.includes(body.status)) {
-    return NextResponse.json({ error: "Invalid status" }, { status: 400 });
-  }
-  const order = await prisma.order.update({ where: { id: params.id }, data: { status: body.status } });
-  return NextResponse.json({ id: order.id, status: order.status });
+  if (!ALLOWED.includes(body.status)) return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+
+  const res = await prisma.order.updateMany({
+    where: { id: params.id, tenantId: gate.tenantId },
+    data: { status: body.status },
+  });
+  if (res.count === 0) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  return NextResponse.json({ id: params.id, status: body.status });
 }

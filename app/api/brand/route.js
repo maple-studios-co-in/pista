@@ -1,17 +1,30 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
+import { getCurrentTenant } from "@/lib/tenant";
 
 export const dynamic = "force-dynamic";
 
-async function getBrand() {
-  let brand = await prisma.brand.findUnique({ where: { id: "default" } });
-  if (!brand) brand = await prisma.brand.create({ data: { id: "default" } });
-  return brand;
+function toBrand(t) {
+  if (!t) return null;
+  return {
+    name: t.name,
+    brandHex: t.brandHex,
+    darkHex: t.darkHex,
+    font: t.font,
+    subdomain: t.slug,
+    aiAssistant: t.aiAssistant,
+    aiCards: t.aiCards,
+    aiUpsell: t.aiUpsell,
+    aiLoyalty: t.aiLoyalty,
+    storeName: t.storeName,
+    address: t.address,
+  };
 }
 
 export async function GET() {
-  return NextResponse.json(await getBrand());
+  const tenant = await getCurrentTenant();
+  return NextResponse.json(toBrand(tenant) || {});
 }
 
 export async function PUT(req) {
@@ -24,14 +37,10 @@ export async function PUT(req) {
   } catch {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
-  const allowed = ["name", "brandHex", "darkHex", "font", "subdomain", "aiAssistant", "aiCards", "aiUpsell", "aiLoyalty"];
+  const allowed = ["name", "brandHex", "darkHex", "font", "aiAssistant", "aiCards", "aiUpsell", "aiLoyalty", "storeName", "address"];
   const data = {};
   for (const k of allowed) if (k in body) data[k] = body[k];
 
-  const brand = await prisma.brand.upsert({
-    where: { id: "default" },
-    update: data,
-    create: { id: "default", ...data },
-  });
-  return NextResponse.json(brand);
+  const tenant = await prisma.tenant.update({ where: { id: gate.tenantId }, data });
+  return NextResponse.json(toBrand(tenant));
 }

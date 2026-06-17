@@ -30,12 +30,12 @@ export default function AdminLayout({ children }) {
     return <div className="grid min-h-screen place-items-center bg-canvas text-sm text-muted">Loading…</div>;
   }
 
-  if (session?.user?.role !== "admin") {
+  if (!["owner", "staff", "admin"].includes(session?.user?.role)) {
     return (
       <div className="grid min-h-screen place-items-center bg-canvas px-8 text-center">
         <div>
           <div className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-full bg-red-50 text-3xl">🔒</div>
-          <h1 className="text-lg font-bold">Admins only</h1>
+          <h1 className="text-lg font-bold">Staff only</h1>
           <p className="mt-1 text-sm text-muted">This area is for {brand.name} staff. You're signed in as a customer.</p>
           <Link href="/menu" className="mt-5 inline-block rounded-xl bg-brand px-6 py-3 text-sm font-bold text-white">Back to app</Link>
         </div>

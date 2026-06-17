@@ -95,6 +95,38 @@ pista/
    └─ ai.js              # scripted recommender
 ```
 
+## Multi-tenant platform
+
+Pista is multi-tenant: Pista (the company) provisions cafés, each with its own
+branded storefront, menu, customers and admin — isolated by `tenantId`.
+
+- **Storefront / café admin** resolve the café from the **subdomain** (`cbtl.<base>`).
+  When there's no café subdomain (your current single-host deploy, or localhost),
+  it falls back to `DEFAULT_TENANT_SLUG` — so the existing site keeps working as
+  "tenant #1".
+- **Super-admin console** at **`/super`** (role `superadmin`): manage cafés, provision
+  new ones (creates tenant + default categories + owner login), suspend/activate,
+  and see platform-wide analytics.
+- **Roles:** `superadmin` (Pista, global) · `owner`/`staff` (one café) · `customer`
+  (one café). Customer emails are unique **per café**.
+
+Seeded logins (dev): `super@pista.app` / `password` (superadmin), `demo@pista.app`
+/ `password` (owner of café `cbtl`).
+
+### Migrating an existing single-tenant database
+
+On a DB that predates multi-tenancy, after pulling this version:
+
+```bash
+npx prisma db push                       # adds Tenant + nullable tenantId (non-destructive)
+node prisma/migrate-to-multitenant.js    # creates superadmin + default tenant, backfills rows
+```
+
+> Note: the old single `Brand` row is replaced by per-café settings — re-apply your
+> colours in **Admin → Branding** after migrating. Subdomain storefronts for *new*
+> cafés need wildcard DNS + TLS (see `MULTI_TENANT_PLAN.md` §10); until then the
+> default host serves tenant #1 and `/super` manages the rest.
+
 ## Deployment & CI/CD
 
 Two GitHub Actions run automatically:

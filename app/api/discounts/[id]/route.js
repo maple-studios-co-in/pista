@@ -7,6 +7,9 @@ export const dynamic = "force-dynamic";
 export async function PATCH(req, { params }) {
   const gate = await requireAdmin();
   if (gate.error) return NextResponse.json({ error: gate.error }, { status: gate.status });
+  const existing = await prisma.discount.findFirst({ where: { id: params.id, tenantId: gate.tenantId } });
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   let b;
   try {
     b = await req.json();
@@ -23,6 +26,8 @@ export async function PATCH(req, { params }) {
 export async function DELETE(_req, { params }) {
   const gate = await requireAdmin();
   if (gate.error) return NextResponse.json({ error: gate.error }, { status: gate.status });
+  const existing = await prisma.discount.findFirst({ where: { id: params.id, tenantId: gate.tenantId } });
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
   await prisma.discount.delete({ where: { id: params.id } });
   return NextResponse.json({ ok: true });
 }

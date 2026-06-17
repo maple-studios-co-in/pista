@@ -9,7 +9,7 @@ export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const orders = await prisma.order.findMany({
-    where: { userId: session.user.id },
+    where: { userId: session.user.id, tenantId: session.user.tenantId ?? undefined },
     orderBy: { createdAt: "desc" },
     include: { items: true },
   });
@@ -19,6 +19,8 @@ export async function GET() {
 export async function POST(req) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const tenantId = session.user.tenantId;
+  if (!tenantId) return NextResponse.json({ error: "No tenant" }, { status: 400 });
 
   let body;
   try {
@@ -29,9 +31,9 @@ export async function POST(req) {
   const lines = Array.isArray(body?.lines) ? body.lines : [];
   if (lines.length === 0) return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
 
-  // Validate items exist and recompute totals server-side.
+  // Validate items belong to THIS tenant; recompute totals server-side.
   const ids = [...new Set(lines.map((l) => l.id))];
-  const dbItems = await prisma.item.findMany({ where: { id: { in: ids } } });
+  const dbItems = await prisma.item.findMany({ where: { id: { in: ids }, tenantId } });
   const byId = Object.fromEntries(dbItems.map((i) => [i.id, i]));
 
   const clean = [];
@@ -48,13 +50,12 @@ export async function POST(req) {
   const tax = Math.round(subtotal * 0.05);
   const reward = Math.round(subtotal * 0.05);
 
-  // Optional promo code
   let discount = 0;
   let discountCode = null;
   if (body.discountCode) {
     const code = String(body.discountCode).toUpperCase().replace(/\s+/g, "");
-    const promo = await prisma.discount.findUnique({ where: { code } });
-    if (promo && promo.active) {
+    const promo = await prisma.discount.findFirst({ where: { code, tenantId, active: true } });
+    if (promo) {
       discount = Math.round((subtotal * promo.percent) / 100);
       discountCode = promo.code;
     }
@@ -64,20 +65,15 @@ export async function POST(req) {
 
   const order = await prisma.order.create({
     data: {
+      tenantId,
       userId: session.user.id,
-      subtotal,
-      tax,
-      reward,
-      discount,
-      discountCode,
-      total,
+      subtotal, tax, reward, discount, discountCode, total,
       fulfilment: body.fulfilment || "pickup",
       payment: body.payment || "upi",
       items: { create: clean },
     },
   });
 
-  // Award loyalty points (1 point per ₹10 spent).
   await prisma.user.update({
     where: { id: session.user.id },
     data: { points: { increment: Math.floor(total / 10) } },

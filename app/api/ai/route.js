@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma, parseItem } from "@/lib/db";
+import { getCurrentTenant } from "@/lib/tenant";
 import { recommend } from "@/lib/ai";
 
 export const dynamic = "force-dynamic";
@@ -9,8 +10,12 @@ export async function POST(req) {
   try {
     query = (await req.json())?.query || "";
   } catch {}
+
+  const tenant = await getCurrentTenant();
+  if (!tenant) return NextResponse.json({ intro: "No menu available.", picks: [] });
+
   const items = (
-    await prisma.item.findMany({ where: { live: true }, include: { category: true } })
+    await prisma.item.findMany({ where: { tenantId: tenant.id, live: true }, include: { category: true } })
   ).map(parseItem);
 
   const { intro, picks } = recommend(query, items);

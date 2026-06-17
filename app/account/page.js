@@ -83,9 +83,14 @@ export default function AccountPage() {
           </div>
         )}
 
-        {session?.user?.role === "admin" && (
+        {["owner", "staff", "admin"].includes(session?.user?.role) && (
           <Link href="/admin" className="mt-4 flex items-center gap-3 rounded-2xl border border-brand bg-brand-tint px-4 py-3.5 text-[13.5px] font-bold text-brand-dark">
             🛠️ Admin dashboard<span className="ml-auto text-xs font-semibold opacity-70">orders, menu, branding →</span>
+          </Link>
+        )}
+        {session?.user?.role === "superadmin" && (
+          <Link href="/super" className="mt-4 flex items-center gap-3 rounded-2xl border border-brand-dark bg-brand-dark px-4 py-3.5 text-[13.5px] font-bold text-white">
+            🌐 Pista platform console<span className="ml-auto text-xs font-semibold opacity-70">manage cafés →</span>
           </Link>
         )}
 

@@ -4,10 +4,14 @@ import { prisma, parseItem } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
-// Partial update — used by quick toggles (live / price).
+async function owned(id, tenantId) {
+  return prisma.item.findFirst({ where: { id, tenantId } });
+}
+
 export async function PATCH(req, { params }) {
   const gate = await requireAdmin();
   if (gate.error) return NextResponse.json({ error: gate.error }, { status: gate.status });
+  if (!(await owned(params.id, gate.tenantId))) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   let body;
   try {
@@ -23,10 +27,10 @@ export async function PATCH(req, { params }) {
   return NextResponse.json(parseItem(item));
 }
 
-// Full update from the menu editor.
 export async function PUT(req, { params }) {
   const gate = await requireAdmin();
   if (gate.error) return NextResponse.json({ error: gate.error }, { status: gate.status });
+  if (!(await owned(params.id, gate.tenantId))) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   let b;
   try {
@@ -67,6 +71,7 @@ export async function PUT(req, { params }) {
 export async function DELETE(_req, { params }) {
   const gate = await requireAdmin();
   if (gate.error) return NextResponse.json({ error: gate.error }, { status: gate.status });
+  if (!(await owned(params.id, gate.tenantId))) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const refs = await prisma.orderItem.count({ where: { itemId: params.id } });
   if (refs > 0) {

@@ -1,0 +1,140 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { SectionCard, formatINR } from "@/components/AdminUI";
+
+const BASE = process.env.NEXT_PUBLIC_BASE_DOMAIN || "pista.maplestudios.co.in";
+const BLANK = { name: "", slug: "", plan: "growth", ownerName: "", ownerEmail: "", ownerPassword: "" };
+
+export default function CafesPage() {
+  const [rows, setRows] = useState([]);
+  const [creating, setCreating] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState("");
+
+  function load() {
+    fetch("/api/super/tenants").then((r) => (r.ok ? r.json() : [])).then(setRows).catch(() => {});
+  }
+  useEffect(load, []);
+
+  function autoSlug(name) {
+    return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 30);
+  }
+
+  async function create() {
+    setErr("");
+    if (!creating.name || !creating.slug || !creating.ownerEmail || creating.ownerPassword.length < 6) {
+      setErr("Fill name, slug, owner email and a 6+ char password.");
+      return;
+    }
+    setSaving(true);
+    const res = await fetch("/api/super/tenants", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(creating),
+    });
+    setSaving(false);
+    if (!res.ok) { const d = await res.json(); setErr(d.error || "Failed"); return; }
+    setCreating(null);
+    load();
+  }
+
+  async function setStatus(t, status) {
+    setRows((arr) => arr.map((x) => (x.id === t.id ? { ...x, status } : x)));
+    await fetch(`/api/super/tenants/${t.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }) });
+  }
+
+  return (
+    <div className="mx-auto max-w-6xl">
+      <header className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Cafés</h1>
+          <p className="text-sm text-muted">{rows.length} on the platform.</p>
+        </div>
+        <button onClick={() => setCreating({ ...BLANK })} className="rounded-xl bg-brand px-4 py-2.5 text-[13px] font-bold text-white">+ New café</button>
+      </header>
+
+      <SectionCard>
+        <div className="overflow-x-auto">
+          <table className="w-full text-[13px]">
+            <thead>
+              <tr className="border-b border-line text-left text-[11px] uppercase tracking-wide text-muted">
+                <th className="px-5 py-3">Café</th><th className="px-5 py-3">Subdomain</th><th className="px-5 py-3">Plan</th>
+                <th className="px-5 py-3">Items</th><th className="px-5 py-3">Orders</th><th className="px-5 py-3">Revenue</th>
+                <th className="px-5 py-3">Status</th><th className="px-5 py-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.length === 0 && <tr><td colSpan={8} className="px-5 py-8 text-center text-muted">No cafés yet — create your first.</td></tr>}
+              {rows.map((t) => (
+                <tr key={t.id} className="border-b border-line last:border-0">
+                  <td className="px-5 py-3 font-semibold">
+                    <span className="mr-2 inline-block h-3 w-3 rounded-full align-middle" style={{ background: t.brandHex }} />
+                    {t.name}
+                  </td>
+                  <td className="px-5 py-3">
+                    <a href={`https://${t.slug}.${BASE}`} target="_blank" rel="noreferrer" className="text-brand-dark underline">{t.slug}.{BASE}</a>
+                  </td>
+                  <td className="px-5 py-3 capitalize text-muted">{t.plan}</td>
+                  <td className="px-5 py-3">{t.items}</td>
+                  <td className="px-5 py-3">{t.orders}</td>
+                  <td className="px-5 py-3 font-bold">{formatINR(t.revenue)}</td>
+                  <td className="px-5 py-3">
+                    <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold capitalize ${t.status === "active" ? "bg-green-50 text-green-700" : t.status === "suspended" ? "bg-red-50 text-red-600" : "bg-amber-50 text-amber-700"}`}>{t.status}</span>
+                  </td>
+                  <td className="px-5 py-3">
+                    {t.status === "suspended" ? (
+                      <button onClick={() => setStatus(t, "active")} className="rounded-lg border border-line px-3 py-1.5 text-[12px] font-bold">Activate</button>
+                    ) : (
+                      <button onClick={() => setStatus(t, "suspended")} className="rounded-lg px-3 py-1.5 text-[12px] font-bold text-red-500">Suspend</button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </SectionCard>
+
+      {creating && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-6" onClick={() => setCreating(null)}>
+          <div className="w-full max-w-lg overflow-y-auto rounded-t-3xl bg-white p-6 sm:rounded-3xl" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-lg font-bold">Provision a new café</h2>
+            <p className="mt-1 text-[12px] text-muted">Creates the tenant, default menu categories and an owner login.</p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <F label="Café name" full>
+                <input className={inp} value={creating.name}
+                  onChange={(e) => setCreating({ ...creating, name: e.target.value, slug: creating.slug || autoSlug(e.target.value) })} />
+              </F>
+              <F label="Subdomain">
+                <input className={inp} value={creating.slug} onChange={(e) => setCreating({ ...creating, slug: autoSlug(e.target.value) })} />
+              </F>
+              <F label="Plan">
+                <select className={inp} value={creating.plan} onChange={(e) => setCreating({ ...creating, plan: e.target.value })}>
+                  <option value="starter">Starter</option><option value="growth">Growth</option><option value="enterprise">Enterprise</option>
+                </select>
+              </F>
+              <F label="Owner name"><input className={inp} value={creating.ownerName} onChange={(e) => setCreating({ ...creating, ownerName: e.target.value })} /></F>
+              <F label="Owner email"><input className={inp} type="email" value={creating.ownerEmail} onChange={(e) => setCreating({ ...creating, ownerEmail: e.target.value })} /></F>
+              <F label="Owner password" full><input className={inp} type="text" value={creating.ownerPassword} onChange={(e) => setCreating({ ...creating, ownerPassword: e.target.value })} placeholder="Share with the café owner" /></F>
+            </div>
+            {creating.slug && <p className="mt-3 text-[12px] text-muted">Storefront will be <b>{creating.slug}.{BASE}</b> (needs the subdomain DNS + cert).</p>}
+            {err && <div className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600">{err}</div>}
+            <div className="mt-5 flex gap-3">
+              <button onClick={create} disabled={saving} className="flex-1 rounded-xl bg-brand py-3 text-[14px] font-bold text-white disabled:opacity-50">{saving ? "Creating…" : "Create café"}</button>
+              <button onClick={() => setCreating(null)} className="rounded-xl border border-line px-5 py-3 text-[14px] font-semibold">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const inp = "w-full rounded-lg border border-line px-3 py-2.5 text-[13px] outline-none focus:border-brand";
+function F({ label, children, full }) {
+  return (
+    <div className={full ? "sm:col-span-2" : ""}>
+      <label className="mb-1 block text-[12px] font-semibold text-ink/70">{label}</label>
+      {children}
+    </div>
+  );
+}
