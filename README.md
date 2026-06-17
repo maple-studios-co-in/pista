@@ -1,5 +1,7 @@
 # Pista 🟢
 
+[![CI](https://github.com/maple-studios-co-in/pista/actions/workflows/ci.yml/badge.svg)](https://github.com/maple-studios-co-in/pista/actions/workflows/ci.yml)
+
 **Pista** is an AI-powered, white-label ordering web app for cafes and restaurant chains — inspired by fudr.in. A chain configures its brand (name, colours, menu) once, and gets a clean, mobile-first ordering experience with AI built in: smart recommendations, "know your cup" food intelligence (origin, ingredients, allergens, nutrition), and smart upsells.
 
 This build is branded around a coffee chain and grounded in The Coffee Bean & Tea Leaf's menu structure.
@@ -92,6 +94,25 @@ pista/
    ├─ menu.js            # menu data (swap for API/DB)
    └─ ai.js              # scripted recommender
 ```
+
+## Deployment & CI/CD
+
+Two GitHub Actions run automatically:
+
+- **CI** (`ci.yml`) — builds the app on every push/PR to `main`.
+- **Docker publish** (`docker-publish.yml`) — builds and pushes an image to `ghcr.io/maple-studios-co-in/pista` on every push to `main` and on `v*` tags (uses `GITHUB_TOKEN`, no extra secrets).
+
+To run it on your own server, pull the image and provide env vars:
+
+```bash
+docker run -d -p 3000:3000 \
+  -e NEXTAUTH_URL="https://order.yourdomain.com" \
+  -e NEXTAUTH_SECRET="$(openssl rand -base64 32)" \
+  -v pista-db:/app/prisma \
+  ghcr.io/maple-studios-co-in/pista:latest
+```
+
+Full instructions (Docker Compose, plain Node/PM2, Postgres, HTTPS) are in **[DEPLOY.md](./DEPLOY.md)**.
 
 ## Roadmap / next steps
 

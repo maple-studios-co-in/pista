@@ -1,0 +1,24 @@
+# Self-host Pista with Docker Compose.
+#   1) Set NEXTAUTH_SECRET in a .env file next to this one (openssl rand -base64 32)
+#   2) docker compose up -d --build
+#   3) (first run only) seed the menu:  docker compose exec app npm run seed
+#
+# Uses SQLite by default, persisted in the named volume. For Postgres, set the
+# Prisma provider to "postgresql" and point DATABASE_URL at your database.
+
+services:
+  app:
+    build: .
+    image: ghcr.io/maple-studios-co-in/pista:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=file:./dev.db
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:?set NEXTAUTH_SECRET in your .env}
+    volumes:
+      - pista-db:/app/prisma
+    restart: unless-stopped
+
+volumes:
+  pista-db:
