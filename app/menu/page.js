@@ -24,6 +24,21 @@ export default function MenuPage() {
   const picks = items.filter((i) => i.signature || i.rating >= 4.7).slice(0, 6);
   const shownCats = cat === "all" ? categories : categories.filter((c) => c.id === cat);
 
+  if (!loading && data.suspended) {
+    return (
+      <AppShell>
+        <Header />
+        <div className="grid min-h-[60vh] place-items-center px-8 text-center">
+          <div>
+            <div className="mx-auto mb-4 grid h-20 w-20 place-items-center rounded-full bg-canvas text-4xl">🚧</div>
+            <h2 className="text-lg font-bold">Store unavailable</h2>
+            <p className="mt-1 text-sm text-muted">{data.name || "This café"} isn't taking orders right now. Please check back soon.</p>
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
+
   return (
     <AppShell>
       <Header />

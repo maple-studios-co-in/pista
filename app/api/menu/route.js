@@ -8,6 +8,9 @@ export async function GET(req) {
   const all = new URL(req.url).searchParams.get("all") === "1";
   const tenant = await getCurrentTenant();
   if (!tenant) return NextResponse.json({ categories: [], items: [] });
+  if (tenant.status && tenant.status !== "active") {
+    return NextResponse.json({ suspended: true, name: tenant.name, categories: [], items: [] });
+  }
 
   const [categories, items] = await Promise.all([
     prisma.category.findMany({ where: { tenantId: tenant.id }, orderBy: { sort: "asc" } }),

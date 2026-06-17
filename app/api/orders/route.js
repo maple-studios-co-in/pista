@@ -21,6 +21,8 @@ export async function POST(req) {
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const tenantId = session.user.tenantId;
   if (!tenantId) return NextResponse.json({ error: "No tenant" }, { status: 400 });
+  const tenant = await prisma.tenant.findUnique({ where: { id: tenantId } });
+  if (!tenant || tenant.status !== "active") return NextResponse.json({ error: "This store is currently unavailable." }, { status: 403 });
 
   let body;
   try {
