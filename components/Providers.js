@@ -19,14 +19,25 @@ function lineKey(item, opts) {
 function CartProvider({ children }) {
   const [lines, setLines] = useState([]);
   const [ready, setReady] = useState(false);
+  const [table, setTableState] = useState(null);
 
   useEffect(() => {
     try {
       const saved = localStorage.getItem("pista.cart");
       if (saved) setLines(JSON.parse(saved));
+      const t = localStorage.getItem("pista.table");
+      if (t) setTableState(JSON.parse(t));
     } catch {}
     setReady(true);
   }, []);
+
+  function setTable(t) {
+    setTableState(t);
+    try {
+      if (t) localStorage.setItem("pista.table", JSON.stringify(t));
+      else localStorage.removeItem("pista.table");
+    } catch {}
+  }
 
   useEffect(() => {
     if (ready) localStorage.setItem("pista.cart", JSON.stringify(lines));
@@ -72,7 +83,7 @@ function CartProvider({ children }) {
   const subtotal = lines.reduce((s, l) => s + l.unit * l.qty, 0);
 
   return (
-    <CartCtx.Provider value={{ lines, add, dec, setQty, clear, qtyOf, count, subtotal, ready }}>
+    <CartCtx.Provider value={{ lines, add, dec, setQty, clear, qtyOf, count, subtotal, ready, table, setTable }}>
       {children}
     </CartCtx.Provider>
   );

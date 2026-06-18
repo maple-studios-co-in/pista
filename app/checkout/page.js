@@ -22,7 +22,7 @@ const PAYMENTS = [
 export default function CheckoutPage() {
   const router = useRouter();
   const { status } = useSession();
-  const { lines, subtotal, clear } = useCart();
+  const { lines, subtotal, clear, table } = useCart();
   const { brand } = useBrand();
   const [ful, setFul] = useState("pickup");
   const [pay, setPay] = useState("upi");
@@ -78,7 +78,7 @@ export default function CheckoutPage() {
       const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lines, fulfilment: ful, payment: pay, discountCode: applied?.code || null, rewardId: redeem?.id || null }),
+        body: JSON.stringify({ lines, fulfilment: ful, payment: pay, discountCode: applied?.code || null, rewardId: redeem?.id || null, tableId: table?.id || null }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -105,7 +105,12 @@ export default function CheckoutPage() {
           <h1 className="text-[17px] font-bold">Checkout</h1>
         </div>
 
-        <Card title="How would you like it?"><Seg options={FULFILMENT} value={ful} onChange={setFul} /></Card>
+        {table && (
+          <div className="mx-4 mt-3 flex items-center gap-2 rounded-xl bg-brand-tint px-3.5 py-3 text-[13px] font-semibold text-brand-dark">
+            🍽️ Dine-in · <b>{table.label}</b><span className="ml-auto text-[11px] font-medium opacity-70">served to your table</span>
+          </div>
+        )}
+        {!table && <Card title="How would you like it?"><Seg options={FULFILMENT} value={ful} onChange={setFul} /></Card>}
 
         <Card title={ful === "delivery" ? "Delivery" : "Pickup time"}>
           <Seg options={[{ id: "asap", label: "ASAP · 12 min" }, { id: "sched", label: "Schedule" }]} value="asap" onChange={() => {}} />

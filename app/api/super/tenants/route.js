@@ -88,6 +88,9 @@ export async function POST(req) {
   if (b.seedMenu !== false) rewardData.push({ tenantId: tenant.id, title: "Free Café Latte", type: "freeItem", cost: 150, itemId: `${slug}-cafe-latte`, itemName: "Café Latte" });
   await prisma.reward.createMany({ data: rewardData });
 
+  // Default tables (T1–T6) so dine-in QR ordering works out of the box
+  await prisma.table.createMany({ data: Array.from({ length: 6 }, (_, i) => ({ tenantId: tenant.id, label: `T${i + 1}` })) });
+
   // Owner account: with a password, or an invite link to set their own.
   let inviteUrl = null;
   if (ownerPassword) {

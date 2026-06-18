@@ -38,6 +38,19 @@ model Tenant {
   users      User[]
   rewards    Reward[]
   feedback   Feedback[]
+  tables     Table[]
+}
+
+model Table {
+  id        String   @id @default(cuid())
+  tenantId  String?
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id])
+  label     String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  orders    Order[]
+
+  @@index([tenantId])
 }
 
 model Feedback {
@@ -148,6 +161,9 @@ model Order {
   total        Int
   fulfilment   String      @default("pickup")
   payment      String      @default("upi")
+  tableId      String?
+  tableLabel   String?
+  table        Table?      @relation(fields: [tableId], references: [id])
   status       String      @default("preparing")
   createdAt    DateTime    @default(now())
   items        OrderItem[]

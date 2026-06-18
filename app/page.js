@@ -15,10 +15,16 @@ export default function LandingPage() {
   useEffect(() => {
     const root = document.querySelector(".landing");
     if (!root) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const bar = document.createElement("div");
+    bar.className = "scroll-prog";
+    root.appendChild(bar);
+    const nav = root.querySelector("nav");
     const targets = [...root.querySelectorAll(".card,.feat,.step,.price,.center-head,.showcard,.cta-band,.stats,.logo-row")];
-    root.classList.add("anim");
-    targets.forEach((e) => e.classList.add("reveal"));
+    if (!reduce) {
+      root.classList.add("anim");
+      targets.forEach((e, i) => { e.classList.add("reveal"); if (e.classList.contains("feat")) e.classList.add(i % 2 ? "from-right" : "from-left"); });
+    }
 
     const animateNum = (el) => {
       if (el.dataset.done) return;
@@ -45,8 +51,32 @@ export default function LandingPage() {
       },
       { threshold: 0.15, rootMargin: "0px 0px -8% 0px" }
     );
-    targets.forEach((e) => io.observe(e));
-    return () => io.disconnect();
+    if (!reduce) targets.forEach((e) => io.observe(e));
+
+    const stage = root.querySelector(".phone-stage");
+    const heroVid = root.querySelector(".hero-vid");
+    const visuals = [...root.querySelectorAll(".fvisual")];
+    let ticking = false;
+    const onScroll = () => {
+      const y = window.scrollY || 0;
+      const h = document.documentElement.scrollHeight - window.innerHeight;
+      bar.style.width = (h > 0 ? (y / h) * 100 : 0) + "%";
+      if (nav) nav.classList.toggle("scrolled", y > 16);
+      if (!reduce) {
+        if (heroVid) heroVid.style.transform = `translateY(${y * 0.16}px) scale(1.06)`;
+        if (stage && y < 1000) stage.style.transform = `translateY(${y * -0.05}px)`;
+        visuals.forEach((v) => {
+          const r = v.getBoundingClientRect();
+          const off = r.top + r.height / 2 - window.innerHeight / 2;
+          v.style.transform = `translateY(${off * -0.045}px)`;
+        });
+      }
+      ticking = false;
+    };
+    const onScrollT = () => { if (!ticking) { requestAnimationFrame(onScroll); ticking = true; } };
+    window.addEventListener("scroll", onScrollT, { passive: true });
+    onScroll();
+    return () => { window.removeEventListener("scroll", onScrollT); io.disconnect(); bar.remove(); };
   }, []);
 
   return (
@@ -62,7 +92,6 @@ export default function LandingPage() {
             <a href="#pricing">Pricing</a>
           </div>
           <div className="nav-cta">
-            <Link href="/menu" className="btn btn-ghost">View live demo</Link>
             <a href="#demo" className="btn btn-primary">Book a demo</a>
           </div>
         </div>
@@ -81,7 +110,6 @@ export default function LandingPage() {
             <p className="sub">Pista gives restaurant chains, cafés and coffee shops a beautiful branded ordering app in days — with an AI assistant, food intelligence and smart upsells built in. Your brand, your menu, your customers.</p>
             <div className="hero-cta">
               <a href="#demo" className="btn btn-primary">Book a demo →</a>
-              <Link href="/menu" className="btn btn-ghost">View live demo →</Link>
             </div>
             <div className="hero-trust">
               <span className="stars">★★★★★</span>
@@ -335,6 +363,8 @@ export default function LandingPage() {
       <section id="demo" style={{ paddingTop: 0 }}>
         <div className="wrap">
           <div className="cta-band">
+            <video className="cta-vid" autoPlay muted loop playsInline><source src="/cafe-ambient.mp4" type="video/mp4" /></video>
+            <div className="cta-veil" />
             <div className="sp">✨</div>
             <h2>Ready to launch your own ordering app?</h2>
             <p>Book a 20-minute demo and we&apos;ll spin up a branded preview of your café&apos;s app — AI and all — before you decide.</p>
@@ -448,8 +478,16 @@ export default function LandingPage() {
         @keyframes phFrame { from { opacity:0; transform:translateY(18px) scale(.95) } to { opacity:1; transform:none } }
         @keyframes phPiece { from { opacity:0; transform:translateY(12px) scale(.98) } to { opacity:1; transform:none } }
         @keyframes phFade { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:none } }
-        .landing.anim .reveal { opacity:0; transform:translateY(24px); transition:opacity .7s cubic-bezier(.2,.8,.2,1), transform .7s cubic-bezier(.2,.8,.2,1); will-change:opacity,transform; }
-        .landing.anim .reveal.in { opacity:1; transform:none; }
+        .landing.anim .reveal { opacity:0; transform:translateY(30px); filter:blur(7px); transition:opacity .8s cubic-bezier(.2,.8,.2,1), transform .8s cubic-bezier(.2,.8,.2,1), filter .8s ease; }
+        .landing.anim .reveal.from-left { transform:translateX(-46px); }
+        .landing.anim .reveal.from-right { transform:translateX(46px); }
+        .landing.anim .reveal.in { opacity:1; transform:none; filter:blur(0); }
+        .landing .scroll-prog { position:fixed; top:0; left:0; height:3px; width:0; background:linear-gradient(90deg, var(--pista), var(--pista-dd)); z-index:200; transition:width .12s linear; }
+        .landing nav { transition:box-shadow .3s, background .3s; }
+        .landing nav.scrolled { box-shadow:0 8px 30px rgba(20,40,10,.07); background:rgba(255,255,255,.93); }
+        .landing .nav-in { transition:height .3s; }
+        .landing nav.scrolled .nav-in { height:58px; }
+        .landing .hero-vid, .landing .fvisual, .landing .phone-stage { will-change:transform; }
         .landing .ph-status { display:flex; justify-content:space-between; font-size:11px; font-weight:600; padding:12px 22px 6px; }
         .landing .ph-head { display:flex; align-items:center; gap:9px; padding:4px 16px 12px; }
         .landing .ph-badge { width:34px; height:34px; border-radius:10px; background:var(--pista-d); color:#fff; display:grid; place-items:center; font-weight:800; font-size:13px; }
@@ -579,6 +617,9 @@ export default function LandingPage() {
         .landing .price .btn { width:100%; justify-content:center; margin-top:auto; }
 
         .landing .cta-band { background:linear-gradient(135deg,var(--pista),var(--pista-d)); color:#fff; border-radius:28px; padding:60px 48px; text-align:center; position:relative; overflow:hidden; }
+        .landing .cta-vid { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; }
+        .landing .cta-veil { position:absolute; inset:0; z-index:1; background:linear-gradient(135deg, rgba(54,81,31,.85), rgba(21,53,28,.8)); }
+        .landing .cta-band > *:not(.cta-vid):not(.cta-veil) { position:relative; z-index:2; }
         .landing .cta-band .sp { position:absolute; font-size:200px; opacity:.08; right:-20px; top:-50px; }
         .landing .cta-band h2 { font-size:38px; font-weight:800; }
         @media(max-width:700px){ .landing .cta-band h2{font-size:28px} .landing .cta-band{padding:44px 24px} }

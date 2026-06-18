@@ -14,7 +14,7 @@ export async function GET(req) {
 
   return NextResponse.json(
     orders.map((o) => ({
-      id: o.id, subtotal: o.subtotal, total: o.total, status: o.status, fulfilment: o.fulfilment, payment: o.payment, createdAt: o.createdAt,
+      id: o.id, subtotal: o.subtotal, total: o.total, status: o.status, fulfilment: o.fulfilment, table: o.tableLabel || null, payment: o.payment, createdAt: o.createdAt,
       customer: o.user?.name || o.user?.email || "Guest", email: o.user?.email,
       items: o.items.map((i) => ({ name: i.name, qty: i.qty, size: i.size, milk: i.milk })),
     }))

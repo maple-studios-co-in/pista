@@ -84,6 +84,14 @@ export async function POST(req) {
 
   const total = subtotal + tax - reward - discount - loyaltyDiscount;
 
+  // Dine-in: associate the order with a table (from the table QR)
+  let tableId = null, tableLabel = null;
+  if (body.tableId) {
+    const table = await prisma.table.findFirst({ where: { id: body.tableId, tenantId, active: true } });
+    if (table) { tableId = table.id; tableLabel = table.label; }
+  }
+  const fulfilment = tableId ? "dinein" : (body.fulfilment || "pickup");
+
   // Loyalty: earn points by tenant's earn rate (points per ₹100 of subtotal)
   const earnRate = tenant.loyaltyEarnRate ?? 10;
   const pointsEarned = Math.floor((subtotal * earnRate) / 100);
@@ -93,7 +101,8 @@ export async function POST(req) {
       tenantId,
       userId: session.user.id,
       subtotal, tax, reward, discount, discountCode, loyaltyDiscount, pointsRedeemed, rewardTitle, total,
-      fulfilment: body.fulfilment || "pickup",
+      fulfilment,
+      tableId, tableLabel,
       payment: body.payment || "upi",
       items: { create: clean },
     },

@@ -5,11 +5,13 @@ import Link from "next/link";
 import AppShell from "@/components/AppShell";
 import Header from "@/components/Header";
 import { ListItem, RailCard } from "@/components/ProductCard";
+import { useCart } from "@/components/Providers";
 
 export default function MenuPage() {
   const [cat, setCat] = useState("all");
   const [data, setData] = useState({ categories: [], items: [] });
   const [loading, setLoading] = useState(true);
+  const { table, setTable } = useCart();
 
   useEffect(() => {
     fetch("/api/menu")
@@ -18,6 +20,16 @@ export default function MenuPage() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  // Table QR: ?table=<id> → associate this session with the table
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get("table");
+    if (!id) return;
+    fetch(`/api/tables/${id}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((t) => t && setTable({ id: t.id, label: t.label }))
+      .catch(() => {});
+  }, [setTable]);
 
   const { categories, items } = data;
   const chips = [{ id: "all", label: "All" }, ...categories];
@@ -42,6 +54,13 @@ export default function MenuPage() {
   return (
     <AppShell>
       <Header />
+
+      {table && (
+        <div className="mx-4 mt-3 flex items-center gap-2 rounded-xl bg-brand-tint px-3.5 py-2.5 text-[13px] font-semibold text-brand-dark">
+          🍽️ Ordering for <b>{table.label}</b>
+          <button onClick={() => setTable(null)} className="ml-auto text-[12px] font-bold opacity-70">Leave table</button>
+        </div>
+      )}
 
       <Link href="/ai" className="mx-4 mt-3.5 block">
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand to-brand-dark p-4 text-white">

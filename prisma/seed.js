@@ -134,6 +134,9 @@ async function main() {
       await prisma.feedback.create({ data: { tenantId: cbtl.id, name, rating, comment: comment || null } });
     }
   }
+  if ((await prisma.table.count({ where: { tenantId: cbtl.id } })) === 0) {
+    for (let i = 1; i <= 6; i++) await prisma.table.create({ data: { tenantId: cbtl.id, label: `T${i}` } });
+  }
 
   // ---- Tenant 2: Blue Tokai (a second demo café) ----
   const bt = await prisma.tenant.upsert({
@@ -146,6 +149,9 @@ async function main() {
   const c2 = [await ensureUser({ email: "kabir@example.com", name: "Kabir Rao", role: "customer", tenantId: bt.id, points: 90 })];
   if ((await prisma.reward.count({ where: { tenantId: bt.id } })) === 0) {
     await prisma.reward.create({ data: { tenantId: bt.id, title: "₹50 off", type: "discount", cost: 150, amount: 50 } });
+  }
+  if ((await prisma.table.count({ where: { tenantId: bt.id } })) === 0) {
+    for (let i = 1; i <= 4; i++) await prisma.table.create({ data: { tenantId: bt.id, label: `T${i}` } });
   }
   const o2 = await seedOrders(bt, [owner2, ...c2]);
 

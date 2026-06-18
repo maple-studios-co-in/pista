@@ -80,7 +80,7 @@ export default function AdminOrdersPage() {
                       <div key={k}>{i.qty}× {i.name}{i.milk ? ` · ${i.milk}` : ""}</div>
                     ))}
                   </td>
-                  <td className="px-5 py-3 capitalize text-muted">{o.fulfilment}</td>
+                  <td className="px-5 py-3 capitalize text-muted">{o.fulfilment}{o.table ? ` · ${o.table}` : ""}</td>
                   <td className="px-5 py-3 font-bold">{formatINR(o.total)}</td>
                   <td className="px-5 py-3 text-muted">{new Date(o.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</td>
                   <td className="px-5 py-3"><StatusBadge status={o.status} /></td>
