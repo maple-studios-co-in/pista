@@ -26,6 +26,9 @@ model Tenant {
   // store info
   storeName   String?
   address     String?
+  // loyalty
+  loyaltyEarnRate Int    @default(10)   // points earned per ₹100 spent
+  tiers           String @default("[]") // JSON: [{name,min}]
   createdAt   DateTime @default(now())
 
   categories Category[]
@@ -33,6 +36,23 @@ model Tenant {
   orders     Order[]
   discounts  Discount[]
   users      User[]
+  rewards    Reward[]
+}
+
+model Reward {
+  id        String   @id @default(cuid())
+  tenantId  String?
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id])
+  title     String
+  type      String   @default("discount") // discount | freeItem
+  cost      Int      // points required to redeem
+  amount    Int      @default(0)          // ₹ off (discount type)
+  itemId    String?                        // free item (freeItem type)
+  itemName  String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
 }
 
 model Category {
@@ -87,6 +107,8 @@ model User {
   password  String
   role      String   @default("customer") // superadmin | owner | staff | customer
   points    Int      @default(120)
+  inviteToken   String?   @unique
+  inviteExpires DateTime?
   createdAt DateTime @default(now())
   orders    Order[]
 
@@ -105,6 +127,9 @@ model Order {
   reward       Int
   discount     Int         @default(0)
   discountCode String?
+  loyaltyDiscount Int      @default(0)
+  pointsRedeemed  Int      @default(0)
+  rewardTitle     String?
   total        Int
   fulfilment   String      @default("pickup")
   payment      String      @default("upi")

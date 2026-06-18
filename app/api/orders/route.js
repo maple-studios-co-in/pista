@@ -63,13 +63,36 @@ export async function POST(req) {
     }
   }
 
-  const total = subtotal + tax - reward - discount;
+  // Loyalty: redeem a reward with points
+  const dbUser = await prisma.user.findUnique({ where: { id: session.user.id } });
+  let loyaltyDiscount = 0;
+  let pointsRedeemed = 0;
+  let rewardTitle = null;
+  if (body.rewardId) {
+    const reward = await prisma.reward.findFirst({ where: { id: body.rewardId, tenantId, active: true } });
+    if (reward && (dbUser?.points || 0) >= reward.cost) {
+      pointsRedeemed = reward.cost;
+      rewardTitle = reward.title;
+      if (reward.type === "discount") {
+        loyaltyDiscount = Math.min(reward.amount, subtotal);
+      } else if (reward.type === "freeItem" && reward.itemId) {
+        const freeItem = await prisma.item.findFirst({ where: { id: reward.itemId, tenantId } });
+        if (freeItem) clean.push({ itemId: freeItem.id, name: `${freeItem.name} (reward)`, size: "Regular", milk: null, unit: 0, qty: 1 });
+      }
+    }
+  }
+
+  const total = subtotal + tax - reward - discount - loyaltyDiscount;
+
+  // Loyalty: earn points by tenant's earn rate (points per ₹100 of subtotal)
+  const earnRate = tenant.loyaltyEarnRate ?? 10;
+  const pointsEarned = Math.floor((subtotal * earnRate) / 100);
 
   const order = await prisma.order.create({
     data: {
       tenantId,
       userId: session.user.id,
-      subtotal, tax, reward, discount, discountCode, total,
+      subtotal, tax, reward, discount, discountCode, loyaltyDiscount, pointsRedeemed, rewardTitle, total,
       fulfilment: body.fulfilment || "pickup",
       payment: body.payment || "upi",
       items: { create: clean },
@@ -78,7 +101,7 @@ export async function POST(req) {
 
   await prisma.user.update({
     where: { id: session.user.id },
-    data: { points: { increment: Math.floor(total / 10) } },
+    data: { points: { increment: pointsEarned - pointsRedeemed } },
   });
 
   return NextResponse.json({ id: order.id, total: order.total, status: order.status });

@@ -6,6 +6,10 @@ const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcryptjs");
 const prisma = new PrismaClient();
 
+const DEFAULT_TIERS = [
+  { name: "Member", min: 0 }, { name: "Silver", min: 300 }, { name: "Gold", min: 800 }, { name: "Platinum", min: 2000 },
+];
+
 const CATEGORIES = [
   { key: "ice-blended", label: "Ice Blended", sort: 1 },
   { key: "hot-coffee", label: "Hot Coffee", sort: 2 },
@@ -100,7 +104,7 @@ async function main() {
   const cbtl = await prisma.tenant.upsert({
     where: { slug: "cbtl" },
     update: {},
-    create: { name: "The Coffee Bean & Tea Leaf", slug: "cbtl", storeName: "CBTL · Indiranagar", address: "100 Ft Rd, Indiranagar, Bengaluru", brandHex: "#7AB04A", darkHex: "#36511F", plan: "enterprise" },
+    create: { name: "The Coffee Bean & Tea Leaf", slug: "cbtl", storeName: "CBTL · Indiranagar", address: "100 Ft Rd, Indiranagar, Bengaluru", brandHex: "#7AB04A", darkHex: "#36511F", plan: "enterprise", tiers: JSON.stringify(DEFAULT_TIERS) },
   });
   await seedMenu(cbtl, ITEMS);
   const owner1 = await ensureUser({ email: "demo@pista.app", name: "Maple Studios", role: "owner", tenantId: cbtl.id, points: 1240 });
@@ -112,17 +116,24 @@ async function main() {
     const existing = await prisma.discount.findFirst({ where: { code: code[0], tenantId: cbtl.id } });
     if (!existing) await prisma.discount.create({ data: { tenantId: cbtl.id, code: code[0], percent: code[1] } });
   }
+  if ((await prisma.reward.count({ where: { tenantId: cbtl.id } })) === 0) {
+    await prisma.reward.create({ data: { tenantId: cbtl.id, title: "₹75 off your order", type: "discount", cost: 200, amount: 75 } });
+    await prisma.reward.create({ data: { tenantId: cbtl.id, title: "Free Café Latte", type: "freeItem", cost: 150, itemId: "cbtl-cafe-latte", itemName: "Café Latte" } });
+  }
   const o1 = await seedOrders(cbtl, [owner1, ...c1]);
 
   // ---- Tenant 2: Blue Tokai (a second demo café) ----
   const bt = await prisma.tenant.upsert({
     where: { slug: "bluetokai" },
     update: {},
-    create: { name: "Blue Tokai Coffee", slug: "bluetokai", storeName: "Blue Tokai · Koramangala", address: "Koramangala, Bengaluru", brandHex: "#2F6FED", darkHex: "#16356b", plan: "growth" },
+    create: { name: "Blue Tokai Coffee", slug: "bluetokai", storeName: "Blue Tokai · Koramangala", address: "Koramangala, Bengaluru", brandHex: "#2F6FED", darkHex: "#16356b", plan: "growth", tiers: JSON.stringify(DEFAULT_TIERS) },
   });
   await seedMenu(bt, ITEMS.slice(3, 9));
   const owner2 = await ensureUser({ email: "owner@bluetokai.app", name: "Blue Tokai Owner", role: "owner", tenantId: bt.id, points: 0 });
   const c2 = [await ensureUser({ email: "kabir@example.com", name: "Kabir Rao", role: "customer", tenantId: bt.id, points: 90 })];
+  if ((await prisma.reward.count({ where: { tenantId: bt.id } })) === 0) {
+    await prisma.reward.create({ data: { tenantId: bt.id, title: "₹50 off", type: "discount", cost: 150, amount: 50 } });
+  }
   const o2 = await seedOrders(bt, [owner2, ...c2]);
 
   console.log(`Done.`);

@@ -48,9 +48,17 @@ export default function SettingsPage() {
 
       <SectionCard title="Store" className="mb-6">
         <div className="grid gap-4 p-5 sm:grid-cols-2">
-          <Info label="Store name" value={BRAND.store} />
-          <Info label="Address" value={BRAND.address} />
-          <Info label="Subdomain" value={brand.subdomain || "pista.app"} />
+          <div>
+            <label className="mb-1 block text-[12px] font-semibold text-ink/70">Store name</label>
+            <input className="w-full rounded-lg border border-line px-3 py-2.5 text-[13px] outline-none focus:border-brand" value={brand.storeName || ""} placeholder={BRAND.store}
+              onChange={(e) => { setBrand({ ...brand, storeName: e.target.value }); setSaved(false); }} />
+          </div>
+          <div>
+            <label className="mb-1 block text-[12px] font-semibold text-ink/70">Address</label>
+            <input className="w-full rounded-lg border border-line px-3 py-2.5 text-[13px] outline-none focus:border-brand" value={brand.address || ""} placeholder={BRAND.address}
+              onChange={(e) => { setBrand({ ...brand, address: e.target.value }); setSaved(false); }} />
+          </div>
+          <Info label="Subdomain" value={brand.subdomain || "—"} />
           <Info label="Currency" value="INR (₹)" />
         </div>
       </SectionCard>

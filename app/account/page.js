@@ -13,11 +13,13 @@ export default function AccountPage() {
   const { data: session, status } = useSession();
   const [me, setMe] = useState(null);
   const [orders, setOrders] = useState([]);
+  const [rewards, setRewards] = useState([]);
 
   useEffect(() => {
     if (status !== "authenticated") return;
     fetch("/api/me").then((r) => (r.ok ? r.json() : null)).then(setMe).catch(() => {});
     fetch("/api/orders").then((r) => (r.ok ? r.json() : [])).then(setOrders).catch(() => {});
+    fetch("/api/rewards").then((r) => (r.ok ? r.json() : [])).then(setRewards).catch(() => {});
   }, [status]);
 
   if (status === "unauthenticated") {
@@ -54,8 +56,36 @@ export default function AccountPage() {
         <div className="mt-4 grid grid-cols-3 gap-3">
           <Stat label="Points" value={me ? me.points.toLocaleString("en-IN") : "—"} />
           <Stat label="Orders" value={me ? me.orders : "—"} />
-          <Stat label="Tier" value="Gold" />
+          <Stat label="Tier" value={me?.tier?.name || "—"} />
         </div>
+        {me?.tier?.next && (
+          <p className="mt-2 text-center text-[12px] text-muted">
+            {me.tier.next.toGo} more points to <b className="text-brand-dark">{me.tier.next.name}</b>
+          </p>
+        )}
+
+        {rewards.length > 0 && (
+          <>
+            <h3 className="mb-2 mt-6 text-sm font-bold">Rewards you can unlock</h3>
+            <div className="overflow-hidden rounded-2xl border border-line">
+              {rewards.map((r) => {
+                const afford = (me?.points || 0) >= r.cost;
+                return (
+                  <div key={r.id} className="flex items-center gap-3 border-b border-line px-4 py-3 last:border-0">
+                    <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-tint text-brand-dark">🎁</span>
+                    <div className="flex-1">
+                      <div className="text-[13.5px] font-semibold">{r.title}</div>
+                      <div className="text-[11.5px] text-muted">{r.type === "discount" ? `₹${r.amount} off` : `Free ${r.itemName}`} · {r.cost} pts</div>
+                    </div>
+                    <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${afford ? "bg-brand-tint text-brand-dark" : "bg-gray-100 text-gray-500"}`}>
+                      {afford ? "Redeem at checkout" : `${r.cost - (me?.points || 0)} pts to go`}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
 
         <h3 className="mb-2 mt-6 text-sm font-bold">Recent orders</h3>
         {orders.length === 0 ? (

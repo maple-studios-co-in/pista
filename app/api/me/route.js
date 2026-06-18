@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { parseTiers, tierFor } from "@/lib/loyalty";
 
 export const dynamic = "force-dynamic";
 
@@ -15,8 +16,14 @@ export async function GET() {
   });
   if (!user) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
+  let tier = null;
+  if (user.tenantId) {
+    const t = await prisma.tenant.findUnique({ where: { id: user.tenantId }, select: { tiers: true } });
+    tier = tierFor(user.points, parseTiers(t?.tiers));
+  }
+
   return NextResponse.json({
     id: user.id, name: user.name, email: user.email, role: user.role,
-    tenantId: user.tenantId, points: user.points, orders: user._count.orders,
+    tenantId: user.tenantId, points: user.points, orders: user._count.orders, tier,
   });
 }

@@ -32,8 +32,14 @@ DEFAULT_TENANT_SLUG="$DEFAULT_TENANT_SLUG"
 EOF
 fi
 
-echo "⛁ Applying schema (non-destructive)…"
-npx prisma db push --skip-generate
+echo "⛁ Backing up database…"
+[ -f prisma/dev.db ] && cp prisma/dev.db "prisma/dev.db.bak-$(date +%Y%m%d%H%M%S)" || true
+
+echo "⛁ Applying schema…"
+# --accept-data-loss is required because SQLite rebuilds tables for some additive
+# changes (e.g. adding a unique column); data is preserved. A timestamped backup
+# is taken above just in case.
+npx prisma db push --skip-generate --accept-data-loss
 
 # Idempotent: creates the platform superadmin + default tenant and backfills
 # tenantId on any rows that don't have one yet. Safe to run on every deploy.

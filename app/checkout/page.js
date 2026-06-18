@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import AppShell from "@/components/AppShell";
 import { useCart } from "@/components/Providers";
 import { BRAND, formatINR } from "@/lib/menu";
+import { useBrand } from "@/components/Providers";
 
 const FULFILMENT = [
   { id: "pickup", label: "🥡 Pickup" },
@@ -22,6 +23,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { status } = useSession();
   const { lines, subtotal, clear } = useCart();
+  const { brand } = useBrand();
   const [ful, setFul] = useState("pickup");
   const [pay, setPay] = useState("upi");
   const [placing, setPlacing] = useState(false);
@@ -29,15 +31,25 @@ export default function CheckoutPage() {
   const [promo, setPromo] = useState("");
   const [applied, setApplied] = useState(null);
   const [promoMsg, setPromoMsg] = useState("");
+  const [points, setPoints] = useState(0);
+  const [rewards, setRewards] = useState([]);
+  const [redeem, setRedeem] = useState(null); // selected reward
 
   useEffect(() => {
     if (status === "unauthenticated") router.replace("/login?next=/checkout");
   }, [status, router]);
 
+  useEffect(() => {
+    if (status !== "authenticated") return;
+    fetch("/api/me").then((r) => (r.ok ? r.json() : null)).then((d) => d && setPoints(d.points || 0)).catch(() => {});
+    fetch("/api/rewards").then((r) => (r.ok ? r.json() : [])).then(setRewards).catch(() => {});
+  }, [status]);
+
   const taxes = Math.round(subtotal * 0.05);
   const reward = Math.round(subtotal * 0.05);
   const discount = applied ? Math.round((subtotal * applied.percent) / 100) : 0;
-  const total = subtotal + taxes - reward - discount;
+  const loyaltyDiscount = redeem && redeem.type === "discount" ? Math.min(redeem.amount, subtotal) : 0;
+  const total = subtotal + taxes - reward - discount - loyaltyDiscount;
 
   async function applyPromo() {
     const code = promo.trim();
@@ -66,7 +78,7 @@ export default function CheckoutPage() {
       const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lines, fulfilment: ful, payment: pay, discountCode: applied?.code || null }),
+        body: JSON.stringify({ lines, fulfilment: ful, payment: pay, discountCode: applied?.code || null, rewardId: redeem?.id || null }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -98,7 +110,7 @@ export default function CheckoutPage() {
         <Card title={ful === "delivery" ? "Delivery" : "Pickup time"}>
           <Seg options={[{ id: "asap", label: "ASAP · 12 min" }, { id: "sched", label: "Schedule" }]} value="asap" onChange={() => {}} />
           <div className="flex items-center gap-2 border-t border-line px-3.5 py-3 text-[13.5px] font-semibold">
-            📍 {BRAND.address}<span className="ml-auto text-xs font-bold text-brand">Change</span>
+            📍 {brand.address || BRAND.address}<span className="ml-auto text-xs font-bold text-brand">Change</span>
           </div>
         </Card>
 
@@ -113,6 +125,28 @@ export default function CheckoutPage() {
             </button>
           ))}
         </Card>
+
+        {rewards.length > 0 && (
+          <Card title={`Redeem points · you have ${points}`}>
+            <div className="flex flex-col gap-2 p-3.5">
+              {rewards.map((rw) => {
+                const afford = points >= rw.cost;
+                const sel = redeem?.id === rw.id;
+                return (
+                  <button key={rw.id} disabled={!afford} onClick={() => setRedeem(sel ? null : rw)}
+                    className={`flex items-center gap-3 rounded-xl border p-3 text-left text-[13px] ${sel ? "border-brand bg-brand-tint" : "border-line"} ${afford ? "" : "opacity-45"}`}>
+                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-brand-tint text-brand-dark">🎁</span>
+                    <div className="flex-1">
+                      <div className="font-semibold">{rw.title}</div>
+                      <div className="text-[11.5px] text-muted">{rw.type === "discount" ? `${formatINR(rw.amount)} off` : `Free ${rw.itemName}`} · {rw.cost} pts</div>
+                    </div>
+                    {sel && <span className="text-[12px] font-bold text-brand-dark">Selected</span>}
+                  </button>
+                );
+              })}
+            </div>
+          </Card>
+        )}
 
         <Card title="Promo code">
           <div className="flex gap-2 p-3.5">
@@ -134,6 +168,7 @@ export default function CheckoutPage() {
           <Row label="Taxes & charges" value={formatINR(taxes)} />
           <Row label="✨ AI loyalty reward" value={`−${formatINR(reward)}`} green />
           {discount > 0 && <Row label={`Promo ${applied.code} (−${applied.percent}%)`} value={`−${formatINR(discount)}`} green />}
+          {redeem && <Row label={`🎁 ${redeem.title} (−${redeem.cost} pts)`} value={redeem.type === "discount" ? `−${formatINR(loyaltyDiscount)}` : "Free item added"} green />}
           <div className="mt-1.5 flex justify-between border-t border-dashed border-line pt-3 text-base font-extrabold">
             <span>Total</span><span>{formatINR(total)}</span>
           </div>

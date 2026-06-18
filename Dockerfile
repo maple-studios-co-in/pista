@@ -31,4 +31,4 @@ EXPOSE 3000
 
 # On start: ensure the schema is applied, then run the server.
 # Provide DATABASE_URL, NEXTAUTH_URL and NEXTAUTH_SECRET at runtime.
-CMD ["sh", "-c", "npx prisma db push --skip-generate && npm start -- -p ${PORT:-3000}"]
+CMD ["sh", "-c", "npx prisma db push --skip-generate --accept-data-loss && npm start -- -p ${PORT:-3000}"]

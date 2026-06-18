@@ -16,7 +16,7 @@ export default function Header({ showSearch = true }) {
         </div>
         <div className="min-w-0 flex-1">
           <div className="text-[11px] uppercase tracking-wide text-muted">Pickup from</div>
-          <div className="truncate text-sm font-semibold">{BRAND.store} ▾</div>
+          <div className="truncate text-sm font-semibold">{brand.storeName || BRAND.store} ▾</div>
         </div>
         <Link
           href="/cart"

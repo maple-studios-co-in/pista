@@ -4,13 +4,14 @@ import { useEffect, useState } from "react";
 import { SectionCard, formatINR } from "@/components/AdminUI";
 
 const BASE = process.env.NEXT_PUBLIC_BASE_DOMAIN || "pista.maplestudios.co.in";
-const BLANK = { name: "", slug: "", plan: "growth", ownerName: "", ownerEmail: "", ownerPassword: "", brandHex: "#7AB04A", darkHex: "#36511F" };
+const BLANK = { name: "", slug: "", plan: "growth", address: "", ownerName: "", ownerEmail: "", ownerPassword: "", brandHex: "#7AB04A", darkHex: "#36511F", seedMenu: true };
 
 export default function CafesPage() {
   const [rows, setRows] = useState([]);
   const [creating, setCreating] = useState(null);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
+  const [invite, setInvite] = useState(null);
 
   function load() {
     fetch("/api/super/tenants").then((r) => (r.ok ? r.json() : [])).then(setRows).catch(() => {});
@@ -23,8 +24,12 @@ export default function CafesPage() {
 
   async function create() {
     setErr("");
-    if (!creating.name || !creating.slug || !creating.ownerEmail || creating.ownerPassword.length < 6) {
-      setErr("Fill name, slug, owner email and a 6+ char password.");
+    if (!creating.name || !creating.slug || !creating.ownerEmail) {
+      setErr("Fill café name, subdomain and owner email.");
+      return;
+    }
+    if (creating.ownerPassword && creating.ownerPassword.length < 6) {
+      setErr("Password must be 6+ characters, or leave it blank to send an invite link.");
       return;
     }
     setSaving(true);
@@ -32,8 +37,10 @@ export default function CafesPage() {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(creating),
     });
     setSaving(false);
-    if (!res.ok) { const d = await res.json(); setErr(d.error || "Failed"); return; }
+    const d = await res.json();
+    if (!res.ok) { setErr(d.error || "Failed"); return; }
     setCreating(null);
+    if (d.inviteUrl) setInvite({ slug: d.slug, url: d.inviteUrl });
     load();
   }
 
@@ -112,6 +119,7 @@ export default function CafesPage() {
                   <option value="starter">Starter</option><option value="growth">Growth</option><option value="enterprise">Enterprise</option>
                 </select>
               </F>
+              <F label="Store address" full><input className={inp} value={creating.address} onChange={(e) => setCreating({ ...creating, address: e.target.value })} placeholder="e.g. Koramangala, Bengaluru" /></F>
               <F label="Brand colour">
                 <div className="flex items-center gap-2">
                   <input type="color" value={creating.brandHex} onChange={(e) => setCreating({ ...creating, brandHex: e.target.value })} className="h-9 w-10 cursor-pointer rounded-lg border border-line bg-transparent p-0.5" />
@@ -126,7 +134,8 @@ export default function CafesPage() {
               </F>
               <F label="Owner name"><input className={inp} value={creating.ownerName} onChange={(e) => setCreating({ ...creating, ownerName: e.target.value })} /></F>
               <F label="Owner email"><input className={inp} type="email" value={creating.ownerEmail} onChange={(e) => setCreating({ ...creating, ownerEmail: e.target.value })} /></F>
-              <F label="Owner password" full><input className={inp} type="text" value={creating.ownerPassword} onChange={(e) => setCreating({ ...creating, ownerPassword: e.target.value })} placeholder="Share with the café owner" /></F>
+              <F label="Owner password (optional)" full><input className={inp} type="text" value={creating.ownerPassword} onChange={(e) => setCreating({ ...creating, ownerPassword: e.target.value })} placeholder="Leave blank to send an invite link instead" /></F>
+              <label className="flex items-center gap-2 text-[13px] font-semibold sm:col-span-2"><input type="checkbox" checked={creating.seedMenu} onChange={(e) => setCreating({ ...creating, seedMenu: e.target.checked })} /> Pre-load a starter menu (recommended)</label>
             </div>
             {creating.slug && <p className="mt-3 text-[12px] text-muted">Storefront will be <b>{creating.slug}.{BASE}</b> (needs the subdomain DNS + cert).</p>}
             {err && <div className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600">{err}</div>}
@@ -134,6 +143,21 @@ export default function CafesPage() {
               <button onClick={create} disabled={saving} className="flex-1 rounded-xl bg-brand py-3 text-[14px] font-bold text-white disabled:opacity-50">{saving ? "Creating…" : "Create café"}</button>
               <button onClick={() => setCreating(null)} className="rounded-xl border border-line px-5 py-3 text-[14px] font-semibold">Cancel</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {invite && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6" onClick={() => setInvite(null)}>
+          <div className="w-full max-w-md rounded-3xl bg-white p-6" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-lg font-bold">Café created 🎉</h2>
+            <p className="mt-1 text-[13px] text-muted">Send this set-password link to the <b>{invite.slug}</b> owner so they can finish setup:</p>
+            <div className="mt-3 break-all rounded-lg bg-canvas px-3 py-2 font-mono text-[12px]">{invite.url}</div>
+            <div className="mt-4 flex gap-3">
+              <button onClick={() => navigator.clipboard?.writeText(invite.url)} className="flex-1 rounded-xl bg-brand py-3 text-[14px] font-bold text-white">Copy link</button>
+              <button onClick={() => setInvite(null)} className="rounded-xl border border-line px-5 py-3 text-[14px] font-semibold">Done</button>
+            </div>
+            <p className="mt-3 text-[12px] text-muted">Then run <code>./scripts/add-cafe.sh {invite.slug}</code> on the server to put the subdomain live.</p>
           </div>
         </div>
       )}
