@@ -29,6 +29,13 @@ model Tenant {
   // loyalty
   loyaltyEarnRate Int    @default(10)   // points earned per ₹100 spent
   tiers           String @default("[]") // JSON: [{name,min}]
+  // WhatsApp marketing (provider-agnostic; empty creds => demo/log mode)
+  waProvider  String?  // meta | twilio | bsp | null(demo)
+  waEnabled   Boolean  @default(false)
+  waFromName  String?
+  waConfig    String   @default("{}") // JSON creds per provider
+  waTriggers  Boolean  @default(true)  // auto order-confirmation / ready
+  waNudges    Boolean  @default(true)  // reward-close / win-back nudges
   createdAt   DateTime @default(now())
 
   categories Category[]
@@ -39,6 +46,9 @@ model Tenant {
   rewards    Reward[]
   feedback   Feedback[]
   tables     Table[]
+  banners    Banner[]
+  campaigns  Campaign[]
+  messages   Message[]
 }
 
 model Table {
@@ -135,6 +145,8 @@ model User {
   password  String
   role      String   @default("customer") // superadmin | owner | staff | customer
   points    Int      @default(120)
+  phone     String?
+  waOptIn   Boolean  @default(true) // WhatsApp marketing consent
   inviteToken   String?   @unique
   inviteExpires DateTime?
   createdAt DateTime @default(now())
@@ -195,4 +207,70 @@ model Discount {
 
   @@unique([tenantId, code])
   @@index([tenantId])
+}
+
+
+model Banner {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  title     String?
+  subtitle  String?
+  imageUrl  String
+  link      String?
+  active    Boolean  @default(true)
+  sort      Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
+}
+
+model Campaign {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  name      String
+  segment   String   @default("all") // segment key
+  template  String   @default("")    // base copy the AI personalizes
+  status    String   @default("draft") // draft | sent
+  audience  Int      @default(0)
+  sentCount Int      @default(0)
+  createdAt DateTime @default(now())
+  messages  Message[]
+
+  @@index([tenantId])
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id])
+  campaignId String?
+  campaign   Campaign? @relation(fields: [campaignId], references: [id])
+  userId     String?
+  channel    String   @default("whatsapp")
+  kind       String   @default("campaign") // campaign | trigger | nudge
+  toName     String?
+  to         String   // phone
+  body       String
+  status     String   @default("demo") // demo | queued | sent | failed
+  provider   String?
+  error      String?
+  createdAt  DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([campaignId])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actorEmail String?
+  actorRole  String?
+  action     String
+  target     String?
+  meta       String?  // JSON
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
 }

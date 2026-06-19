@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { sendWhatsApp } from "@/lib/whatsapp";
 
 export const dynamic = "force-dynamic";
 
@@ -112,6 +113,20 @@ export async function POST(req) {
     where: { id: session.user.id },
     data: { points: { increment: pointsEarned - pointsRedeemed } },
   });
+
+  // WhatsApp order confirmation (auto-trigger; demo-logs when no provider set up)
+  try {
+    if (tenant.waTriggers && dbUser?.waOptIn) {
+      const brand = tenant.storeName || tenant.name;
+      const fName = (dbUser.name || "there").split(" ")[0];
+      const where = tableLabel ? `Table ${tableLabel}` : fulfilment === "dinein" ? "Dine-in" : "Pickup";
+      const ref = order.id.slice(-5).toUpperCase();
+      const msg = `Hi ${fName}, thanks for your order at ${brand}! 🧾 Order #${ref} · ₹${total} · ${where}. We'll ping you when it's ready. You earned ${pointsEarned} points 💚`;
+      await sendWhatsApp({ tenant, to: dbUser.phone, body: msg, kind: "trigger", userId: dbUser.id, toName: dbUser.name });
+    }
+  } catch {
+    /* never block an order on messaging */
+  }
 
   return NextResponse.json({ id: order.id, total: order.total, status: order.status });
 }

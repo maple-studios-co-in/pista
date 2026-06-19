@@ -6,8 +6,9 @@ import { useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 
 const NAV = [
-  { href: "/super", label: "Overview", icon: "🌐" },
+  { href: "/super", label: "Analytics", icon: "📈" },
   { href: "/super/cafes", label: "Cafés", icon: "🏪" },
+  { href: "/super/audit", label: "Audit log", icon: "🧭" },
 ];
 
 export default function SuperLayout({ children }) {

@@ -20,7 +20,7 @@ export default function LandingPage() {
     bar.className = "scroll-prog";
     root.appendChild(bar);
     const nav = root.querySelector("nav");
-    const targets = [...root.querySelectorAll(".card,.feat,.step,.price,.center-head,.showcard,.cta-band,.stats,.logo-row")];
+    const targets = [...root.querySelectorAll(".card,.feat,.step,.price,.center-head,.showcard,.cta-band,.stats,.statband,.tcard,.logo-row")];
     if (!reduce) {
       root.classList.add("anim");
       targets.forEach((e, i) => { e.classList.add("reveal"); if (e.classList.contains("feat")) e.classList.add(i % 2 ? "from-right" : "from-left"); });
@@ -46,6 +46,7 @@ export default function LandingPage() {
           if (!en.isIntersecting) return;
           en.target.classList.add("in");
           if (en.target.classList.contains("stats")) en.target.querySelectorAll(".s b").forEach(animateNum);
+          if (en.target.classList.contains("statband")) en.target.querySelectorAll(".num").forEach(animateNum);
           io.unobserve(en.target);
         });
       },
@@ -160,13 +161,25 @@ export default function LandingPage() {
       {/* LOGO STRIP */}
       <div className="logos">
         <div className="wrap">
-          <div className="lab">Powering ordering for forward-thinking cafés &amp; chains</div>
+          <div className="lab">Trusted by cafés &amp; coffee chains</div>
           <div className="logo-row">
-            <div className="brandname"><img src="https://assets.fudr.in/brand/cbtl/CBTL%20Logo.png" alt="CBTL" style={{ height: 26, width: 26, borderRadius: 6, objectFit: "contain" }} onError={(e) => { e.currentTarget.style.display = "none"; }} /> The Coffee Bean &amp; Tea Leaf</div>
-            <div className="brandname"><span className="b">🫖</span> Chai &amp; Co.</div>
-            <div className="brandname"><span className="b">🥐</span> Maple Bakehouse</div>
-            <div className="brandname"><span className="b">🍵</span> Leaf &amp; Bean</div>
+            <div className="brandname"><img src="https://assets.fudr.in/brand/cbtl/CBTL%20Logo.png" alt="CBTL" style={{ height: 24, width: 24, borderRadius: 6, objectFit: "contain" }} onError={(e) => { e.currentTarget.style.display = "none"; }} /> Coffee Bean &amp; Tea Leaf</div>
+            <div className="brandname">Blue Tokai</div>
+            <div className="brandname">Third Wave</div>
+            <div className="brandname">Chai &amp; Co.</div>
+            <div className="brandname">Maple Bakehouse</div>
+            <div className="brandname">Leaf &amp; Bean</div>
           </div>
+        </div>
+      </div>
+
+      {/* STAT BAND */}
+      <div className="statband-wrap">
+        <div className="wrap statband">
+          <div className="sbi"><div className="num">0%</div><div className="lbl">commission, ever</div></div>
+          <div className="sbi"><div className="num">&lt;7 days</div><div className="lbl">to launch your app</div></div>
+          <div className="sbi"><div className="num">100%</div><div className="lbl">your customer data</div></div>
+          <div className="sbi"><div className="num">24/7</div><div className="lbl">AI ordering</div></div>
         </div>
       </div>
 
@@ -304,6 +317,42 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="show-r" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800')" }} />
+          </div>
+        </div>
+      </section>
+
+      {/* TESTIMONIALS */}
+      <section className="testi">
+        <div className="wrap">
+          <div className="center-head">
+            <span className="eyebrow">Loved by café owners</span>
+            <h2>What operators say</h2>
+          </div>
+          <div className="tgrid">
+            <div className="tcard">
+              <div className="tstars">★★★★★</div>
+              <p className="tquote">"We cut delivery commissions to zero and finally know who our regulars are. The branded app feels like ours, not a marketplace."</p>
+              <div className="twho">
+                <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=160&h=160&fit=crop" alt="" />
+                <div><b>Priya Nair</b><span>Owner · Brew &amp; Bloom</span></div>
+              </div>
+            </div>
+            <div className="tcard">
+              <div className="tstars">★★★★★</div>
+              <p className="tquote">"Live in a weekend. The AI assistant genuinely lifts our average order, and the food-intelligence cards cut counter questions."</p>
+              <div className="twho">
+                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&h=160&fit=crop" alt="" />
+                <div><b>Rohan Mehta</b><span>Co-founder · Third Wave Roasters</span></div>
+              </div>
+            </div>
+            <div className="tcard">
+              <div className="tstars">★★★★★</div>
+              <p className="tquote">"Our loyalty program runs itself now — points, tiers and rewards. Repeat visits are up and we own every customer record."</p>
+              <div className="twho">
+                <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=160&h=160&fit=crop" alt="" />
+                <div><b>Ananya Rao</b><span>Head of Retail · Chai &amp; Co.</span></div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -488,6 +537,23 @@ export default function LandingPage() {
         .landing .nav-in { transition:height .3s; }
         .landing nav.scrolled .nav-in { height:58px; }
         .landing .hero-vid, .landing .fvisual, .landing .phone-stage { will-change:transform; }
+        .landing .statband-wrap { background:var(--pista-dd); }
+        .landing .statband { display:grid; grid-template-columns:repeat(4,1fr); gap:24px; padding:42px 0; }
+        @media(max-width:760px){ .landing .statband { grid-template-columns:repeat(2,1fr); row-gap:30px; } }
+        .landing .sbi { text-align:center; color:#fff; }
+        .landing .sbi .num { font-family:var(--font-serif),Georgia,serif; font-weight:600; font-size:42px; letter-spacing:-.02em; line-height:1; }
+        .landing .sbi .lbl { margin-top:6px; font-size:13px; color:#c7d8b6; }
+        .landing .testi { background:var(--white); }
+        .landing .tgrid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+        @media(max-width:880px){ .landing .tgrid { grid-template-columns:1fr; } }
+        .landing .tcard { border:1px solid var(--line); border-radius:20px; padding:24px; background:#fff; box-shadow:var(--shadow); display:flex; flex-direction:column; transition:transform .25s, box-shadow .25s; }
+        .landing .tcard:hover { transform:translateY(-4px); box-shadow:0 24px 60px rgba(20,40,10,.10); }
+        .landing .tstars { color:#e8a33d; letter-spacing:2px; font-size:14px; }
+        .landing .tquote { font-size:15.5px; line-height:1.55; margin:12px 0 18px; color:var(--ink); }
+        .landing .twho { display:flex; align-items:center; gap:12px; margin-top:auto; }
+        .landing .twho img { width:46px; height:46px; border-radius:50%; object-fit:cover; }
+        .landing .twho b { display:block; font-size:14px; }
+        .landing .twho span { font-size:12.5px; color:var(--muted); }
         .landing .ph-status { display:flex; justify-content:space-between; font-size:11px; font-weight:600; padding:12px 22px 6px; }
         .landing .ph-head { display:flex; align-items:center; gap:9px; padding:4px 16px 12px; }
         .landing .ph-badge { width:34px; height:34px; border-radius:10px; background:var(--pista-d); color:#fff; display:grid; place-items:center; font-weight:800; font-size:13px; }

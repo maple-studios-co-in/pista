@@ -10,6 +10,7 @@ import { useCart } from "@/components/Providers";
 export default function MenuPage() {
   const [cat, setCat] = useState("all");
   const [data, setData] = useState({ categories: [], items: [] });
+  const [banners, setBanners] = useState([]);
   const [loading, setLoading] = useState(true);
   const { table, setTable } = useCart();
 
@@ -19,6 +20,10 @@ export default function MenuPage() {
       .then((d) => setData(d))
       .catch(() => {})
       .finally(() => setLoading(false));
+    fetch("/api/banners")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((b) => Array.isArray(b) && setBanners(b))
+      .catch(() => {});
   }, []);
 
   // Table QR: ?table=<id> → associate this session with the table
@@ -59,6 +64,29 @@ export default function MenuPage() {
         <div className="mx-4 mt-3 flex items-center gap-2 rounded-xl bg-brand-tint px-3.5 py-2.5 text-[13px] font-semibold text-brand-dark">
           🍽️ Ordering for <b>{table.label}</b>
           <button onClick={() => setTable(null)} className="ml-auto text-[12px] font-bold opacity-70">Leave table</button>
+        </div>
+      )}
+
+      {banners.length > 0 && (
+        <div className="no-scrollbar mt-3.5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1">
+          {banners.map((b) => {
+            const inner = (
+              <div className="relative h-36 w-full overflow-hidden rounded-2xl">
+                <img src={b.imageUrl} alt={b.title || "Offer"} className="h-full w-full object-cover" />
+                {(b.title || b.subtitle) && (
+                  <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/60 to-transparent p-3.5 text-white">
+                    {b.title && <div className="text-[15px] font-bold leading-tight">{b.title}</div>}
+                    {b.subtitle && <div className="text-[12px] opacity-90">{b.subtitle}</div>}
+                  </div>
+                )}
+              </div>
+            );
+            return (
+              <div key={b.id} className="w-[88%] shrink-0 snap-center first:ml-0">
+                {b.link ? <Link href={b.link}>{inner}</Link> : inner}
+              </div>
+            );
+          })}
         </div>
       )}
 

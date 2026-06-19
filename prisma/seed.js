@@ -87,11 +87,11 @@ async function seedOrders(tenant, buyers) {
   return made;
 }
 
-async function ensureUser({ email, name, role, tenantId, points = 120 }) {
+async function ensureUser({ email, name, role, tenantId, points = 120, phone = null }) {
   const found = await prisma.user.findFirst({ where: { email, tenantId: tenantId ?? null } });
   if (found) return found;
   const password = await bcrypt.hash("password", 10);
-  return prisma.user.create({ data: { email, name, role, tenantId: tenantId ?? null, password, points } });
+  return prisma.user.create({ data: { email, name, role, tenantId: tenantId ?? null, password, points, phone, waOptIn: true } });
 }
 
 async function main() {
@@ -109,9 +109,17 @@ async function main() {
   await seedMenu(cbtl, ITEMS);
   const owner1 = await ensureUser({ email: "demo@pista.app", name: "Maple Studios", role: "owner", tenantId: cbtl.id, points: 1240 });
   const c1 = [
-    await ensureUser({ email: "aarav@example.com", name: "Aarav Sharma", role: "customer", tenantId: cbtl.id, points: 320 }),
-    await ensureUser({ email: "diya@example.com", name: "Diya Patel", role: "customer", tenantId: cbtl.id, points: 540 }),
+    await ensureUser({ email: "aarav@example.com", name: "Aarav Sharma", role: "customer", tenantId: cbtl.id, points: 320, phone: "+919800000001" }),
+    await ensureUser({ email: "diya@example.com", name: "Diya Patel", role: "customer", tenantId: cbtl.id, points: 540, phone: "+919800000002" }),
   ];
+  if ((await prisma.banner.count({ where: { tenantId: cbtl.id } })) === 0) {
+    await prisma.banner.createMany({
+      data: [
+        { tenantId: cbtl.id, title: "Monsoon Mocha is back ☕", subtitle: "Limited-time seasonal special", imageUrl: "https://images.unsplash.com/photo-1517256064527-09c73fc73e38?w=1200&h=675&fit=crop", link: "/menu", sort: 0 },
+        { tenantId: cbtl.id, title: "Buy 1 Get 1 · Weekdays 3–6pm", subtitle: "On all ice-blended drinks", imageUrl: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=1200&h=675&fit=crop", link: "/menu", sort: 1 },
+      ],
+    });
+  }
   for (const code of [["WELCOME10", 10], ["PISTA15", 15]]) {
     const existing = await prisma.discount.findFirst({ where: { code: code[0], tenantId: cbtl.id } });
     if (!existing) await prisma.discount.create({ data: { tenantId: cbtl.id, code: code[0], percent: code[1] } });

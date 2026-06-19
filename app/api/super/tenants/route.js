@@ -5,6 +5,7 @@ import { prisma, parseItem } from "@/lib/db";
 import { RESERVED, BASE_DOMAIN } from "@/lib/tenant";
 import { STARTER_CATEGORIES, STARTER_ITEMS } from "@/lib/starterMenu";
 import { DEFAULT_TIERS } from "@/lib/loyalty";
+import { logAudit } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -107,6 +108,8 @@ export async function POST(req) {
     });
     inviteUrl = `https://${slug}.${BASE_DOMAIN}/set-password?token=${token}`;
   }
+
+  await logAudit({ session: gate.session, action: "tenant.create", target: tenant.slug, meta: { plan: tenant.plan, name: tenant.name } });
 
   return NextResponse.json({ id: tenant.id, slug: tenant.slug, inviteUrl });
 }
