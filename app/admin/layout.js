@@ -19,6 +19,7 @@ const NAV = [
   { href: "/admin/banners", label: "Banners", icon: "🖼️" },
   { href: "/admin/branding", label: "Branding", icon: "🎨" },
   { href: "/admin/settings", label: "Settings", icon: "⚙️" },
+  { href: "/guide", label: "Guide", icon: "📖" },
 ];
 
 export default function AdminLayout({ children }) {

@@ -10,6 +10,7 @@ const NAV = [
   { href: "/super/cafes", label: "Cafés", icon: "🏪" },
   { href: "/super/audit", label: "Audit log", icon: "🧭" },
   { href: "/pitch", label: "Pitch deck", icon: "📑" },
+  { href: "/guide", label: "Guide", icon: "📖" },
 ];
 
 export default function SuperLayout({ children }) {
