@@ -28,6 +28,7 @@ export default async function GuidePage() {
 
   const userHtml = render("user-guide.md");
   const devHtml = staff ? render("developer-guide.md") : null;
+  const demoHtml = staff ? render("demo-playbook.md") : null;
 
-  return <GuideView userHtml={userHtml} devHtml={devHtml} />;
+  return <GuideView userHtml={userHtml} devHtml={devHtml} demoHtml={demoHtml} />;
 }

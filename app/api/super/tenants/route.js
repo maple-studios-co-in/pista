@@ -24,6 +24,7 @@ export async function GET() {
     tenants.map((t) => ({
       id: t.id, name: t.name, slug: t.slug, status: t.status, plan: t.plan,
       brandHex: t.brandHex, createdAt: t.createdAt,
+      posEnabled: t.posEnabled, aiModel: t.aiModel, aiBaseUrl: t.aiBaseUrl, aiKeySet: !!t.aiApiKey,
       orders: t._count.orders, users: t._count.users, items: t._count.items,
       revenue: rev[t.id] || 0,
     }))

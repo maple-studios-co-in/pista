@@ -20,6 +20,15 @@ export default function SettingsPage() {
 
   const toggle = (key) => { setBrand({ ...brand, [key]: !brand[key] }); setSaved(false); };
 
+  // Locations editor: setLoc(i, null) removes; setLoc(length, {..}) appends.
+  const setLoc = (i, val) => {
+    const next = [...(brand.locations || [])];
+    if (val === null) next.splice(i, 1);
+    else next[i] = val;
+    setBrand({ ...brand, locations: next });
+    setSaved(false);
+  };
+
   async function publish() {
     setSaving(true);
     await saveBrand(brand);
@@ -60,6 +69,23 @@ export default function SettingsPage() {
           </div>
           <Info label="Subdomain" value={brand.subdomain || "—"} />
           <Info label="Currency" value="INR (₹)" />
+        </div>
+      </SectionCard>
+
+      <SectionCard title="Locations" className="mb-6">
+        <div className="p-5">
+          <p className="mb-3 text-[12.5px] text-muted">Outlets your customers can pick from in the app header. Analytics splits revenue by location.</p>
+          {(brand.locations || []).map((l, i) => (
+            <div key={l.id || i} className="mb-2 flex gap-2">
+              <input className="w-40 rounded-lg border border-line px-3 py-2 text-[13px] outline-none focus:border-brand" value={l.label} placeholder="Label (e.g. Indiranagar)"
+                onChange={(e) => setLoc(i, { ...l, label: e.target.value })} />
+              <input className="flex-1 rounded-lg border border-line px-3 py-2 text-[13px] outline-none focus:border-brand" value={l.address || ""} placeholder="Address"
+                onChange={(e) => setLoc(i, { ...l, address: e.target.value })} />
+              <button onClick={() => setLoc(i, null)} className="rounded-lg border border-line px-3 text-[13px] font-bold text-red-600">✕</button>
+            </div>
+          ))}
+          <button onClick={() => setLoc((brand.locations || []).length, { id: `loc-${Date.now()}`, label: "", address: "" })}
+            className="mt-1 rounded-xl border border-line bg-canvas px-3.5 py-2 text-[13px] font-bold">+ Add location</button>
         </div>
       </SectionCard>
 

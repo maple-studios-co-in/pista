@@ -6,7 +6,10 @@ import { BRAND } from "@/lib/menu";
 
 export default function Header({ showSearch = true }) {
   const { brand } = useBrand();
-  const { count } = useCart();
+  const { count, location, setLocation } = useCart();
+
+  const locations = brand.locations || [];
+  const current = (location && locations.find((l) => l.id === location.id)) || locations[0] || null;
 
   return (
     <header className="sticky top-0 z-30 border-b border-line bg-white/85 px-4 pb-3 pt-3 backdrop-blur-md">
@@ -16,7 +19,26 @@ export default function Header({ showSearch = true }) {
         </div>
         <div className="min-w-0 flex-1">
           <div className="text-[11px] uppercase tracking-wide text-muted">Pickup from</div>
-          <div className="truncate text-sm font-semibold">{brand.storeName || BRAND.store} ▾</div>
+          {locations.length > 1 ? (
+            <div className="relative">
+              <select
+                value={current?.id || ""}
+                onChange={(e) => {
+                  const l = locations.find((x) => x.id === e.target.value);
+                  if (l) setLocation({ id: l.id, label: l.label });
+                }}
+                className="w-full appearance-none truncate bg-transparent pr-5 text-sm font-semibold outline-none"
+                aria-label="Choose store location"
+              >
+                {locations.map((l) => (
+                  <option key={l.id} value={l.id}>{brand.storeName ? `${brand.storeName.split("·")[0].trim()} · ${l.label}` : l.label}</option>
+                ))}
+              </select>
+              <span className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-xs">▾</span>
+            </div>
+          ) : (
+            <div className="truncate text-sm font-semibold">{brand.storeName || BRAND.store}</div>
+          )}
         </div>
         <Link
           href="/cart"

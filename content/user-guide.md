@@ -1,52 +1,52 @@
-# Pista — End-User Guide
+# Shoku — End-User Guide
 
-A complete, practical reference for everyone who uses Pista: café owners and staff, the Pista platform (super-admin) team, and the customers who order food and drinks. This guide explains what each screen does and how to get things done, step by step. It is not a developer document.
+A complete, practical reference for everyone who uses Shoku: café owners and staff, the Shoku platform (super-admin) team, and the customers who order food and drinks. This guide explains what each screen does and how to get things done, step by step. It is not a developer document.
 
-All prices in Pista are in Indian Rupees (₹).
+All prices in Shoku are in Indian Rupees (₹).
 
 ---
 
 ## Table of contents
 
-1. [What is Pista](#1-what-is-pista)
+1. [What is Shoku](#1-what-is-shoku)
 2. [Key concepts](#2-key-concepts)
 3. [For customers — ordering, AI, loyalty & feedback](#3-for-customers--ordering-ai-loyalty--feedback)
 4. [For café owners & staff — the admin console](#4-for-café-owners--staff--the-admin-console)
-5. [For the Pista platform team — the super-admin console](#5-for-the-pista-platform-team--the-super-admin-console)
+5. [For the Shoku platform team — the super-admin console](#5-for-the-shoku-platform-team--the-super-admin-console)
 6. [Setting up WhatsApp for a café](#6-setting-up-whatsapp-for-a-café)
 7. [FAQs & troubleshooting](#7-faqs--troubleshooting)
 8. [Glossary](#8-glossary)
 
 ---
 
-## 1. What is Pista
+## 1. What is Shoku
 
-Pista is an AI-powered, white-label, multi-tenant online ordering platform for cafés and coffee shops. Each café gets its own fully branded ordering app — its own name, colours, menu, loyalty programme and an AI ordering assistant — running on its own web address (subdomain), with no app to download. Cafés pay a flat monthly SaaS subscription and keep 100% of every order, instead of paying a 20–30% commission to a food-delivery aggregator. Behind the scenes, the Pista platform team provisions and monitors every café from a single control panel, while owners run their day-to-day store from a friendly admin console and customers order from a clean, mobile-first storefront.
+Shoku is an AI-powered, white-label, multi-tenant online ordering platform for cafés and coffee shops. Each café gets its own fully branded ordering app — its own name, colours, menu, loyalty programme and an AI ordering assistant — running on its own web address (subdomain), with no app to download. Cafés pay a flat monthly SaaS subscription and keep 100% of every order, instead of paying a 20–30% commission to a food-delivery aggregator. Behind the scenes, the Shoku platform team provisions and monitors every café from a single control panel, while owners run their day-to-day store from a friendly admin console and customers order from a clean, mobile-first storefront.
 
 **Who each part of this guide is for:**
 
 - **Customers** order food and drinks. See [Section 3](#3-for-customers--ordering-ai-loyalty--feedback).
 - **Café owners and staff** manage their store — menu, orders, tables, loyalty, marketing and branding. See [Section 4](#4-for-café-owners--staff--the-admin-console).
-- **The Pista platform team (super-admin)** onboards cafés, watches platform health and maintains the investor pitch deck. See [Section 5](#5-for-the-pista-platform-team--the-super-admin-console).
+- **The Shoku platform team (super-admin)** onboards cafés, watches platform health and maintains the investor pitch deck. See [Section 5](#5-for-the-shoku-platform-team--the-super-admin-console).
 
 ---
 
 ## 2. Key concepts
 
 ### White-label café apps on their own subdomain
-Every café on Pista is a separate "tenant" with its own branded storefront. A café's app lives at an address like `your-cafe.pista.maplestudios.co.in`, where `your-cafe` is the café's chosen **subdomain**. The logo initial, brand colour, heading colour, typeface, store name and address all come from that café's own settings, so each storefront looks like the café's own product — not a generic Pista page.
+Every café on Shoku is a separate "tenant" with its own branded storefront. A café's app lives at an address like `your-cafe.getshoku.com`, where `your-cafe` is the café's chosen **subdomain**. The logo initial, brand colour, heading colour, typeface, store name and address all come from that café's own settings, so each storefront looks like the café's own product — not a generic Shoku page.
 
 ### Roles
-Pista has four kinds of users. What you can see and do depends on your role.
+Shoku has four kinds of users. What you can see and do depends on your role.
 
 | Role | Who they are | What they can access |
 | --- | --- | --- |
-| **Super-admin** | The Pista platform team | The platform console at `/super`: analytics, café management, audit log, pitch deck |
+| **Super-admin** | The Shoku platform team | The platform console at `/super`: analytics, café management, audit log, pitch deck |
 | **Owner / Admin** | The café owner | The full café admin console at `/admin` plus the storefront |
 | **Staff** | Café team members | The café admin console at `/admin` (same areas as the owner) plus the storefront |
 | **Customer** | People ordering food | The storefront: menu, AI assistant, cart, checkout, account, loyalty |
 
-If you sign in as a customer and try to open an admin area, Pista shows a "Staff only" screen and offers a link back to the menu. Likewise the platform console is "Pista staff only".
+If you sign in as a customer and try to open an admin area, Shoku shows a "Staff only" screen and offers a link back to the menu. Likewise the platform console is "Shoku staff only".
 
 ### Demo mode vs live
 Several features — most importantly WhatsApp marketing — can run in **demo mode** before a café connects real services. In demo mode the system does everything except actually dispatch the message: it personalizes the text and records it in the message history so the whole flow is visible, but nothing is sent to a real phone. Once a café adds valid provider credentials and switches sending on, the same flow goes **live** and messages really are delivered. See [Section 6](#6-setting-up-whatsapp-for-a-café).
@@ -69,7 +69,7 @@ This section covers the customer storefront. You reach it by opening your café'
 The storefront has a bottom navigation bar with four tabs:
 
 - **Menu** (🏠) — browse and order.
-- **Pista AI** (✨) — the AI ordering assistant.
+- **Shoku AI** (✨) — the AI ordering assistant.
 - **Bag** (🛍️) — your cart; a small badge shows how many items are in it.
 - **Account** (👤) — your profile, points, tier, rewards and order history.
 
@@ -87,7 +87,7 @@ On the **Menu** tab you'll see, from top to bottom:
 
 - **Table banner** (only if you scanned a table QR) — shows "Ordering for [table]" with a **Leave table** option.
 - **Sale banners** — promotional images the café has uploaded; some are tappable.
-- **Pista AI card** — "Not sure what to order?" tap it to open the AI assistant.
+- **Shoku AI card** — "Not sure what to order?" tap it to open the AI assistant.
 - **Category chips** — tap **All** or a category (for example "Ice Blended", "Hot Coffee", "Tea") to filter.
 - **Picked for you** — an AI-curated rail of signature and top-rated items (shown when viewing "All").
 - **Category lists** — every item with its photo, name, price and quick "add" control.
@@ -95,13 +95,13 @@ On the **Menu** tab you'll see, from top to bottom:
 Tap any item to open its detail page.
 
 ### 3.4 The item page and food intelligence
-Each item's page shows its photo, rating, calories, price and description, plus a **"Know your cup ✨ PISTA AI"** panel — Pista's signature **food intelligence**:
+Each item's page shows its photo, rating, calories, price and description, plus a **"Know your cup ✨ SHOKU AI"** panel — Shoku's signature **food intelligence**:
 
 - **🌍 Bean / origin** — where the coffee or key ingredient comes from.
 - **🧾 Ingredients** — what's in it, shown as tags.
 - **⚠️ Allergens** — listed plainly, or "No major allergens".
 - **🥗 Nutrition (regular)** — calories, protein, sugar and caffeine.
-- **💡 AI tip** — a helpful suggestion from Pista (when the café has added one).
+- **💡 AI tip** — a helpful suggestion from Shoku (when the café has added one).
 
 Below that you customise and add to your bag:
 
@@ -109,12 +109,12 @@ Below that you customise and add to your bag:
 2. **Choose milk** (for drinks) — some options such as oat or almond may add a small charge.
 3. Tap **Add to bag**. You're taken to your cart.
 
-### 3.5 Using the AI ordering assistant (Pista AI)
-The **Pista AI** tab is a chat that knows the whole menu — including caffeine, calories and what's good right now.
+### 3.5 Using the AI ordering assistant (Shoku AI)
+The **Shoku AI** tab is a chat that knows the whole menu — including caffeine, calories and what's good right now.
 
-1. Open the **Pista AI** tab (or tap the AI card on the menu).
+1. Open the **Shoku AI** tab (or tap the AI card on the menu).
 2. Either tap a **quick prompt** chip — Cold & refreshing, Need a pick-me-up, Something sweet, Vegan options, High protein, Under 150 kcal, Low caffeine — or type your own request in the box (for example "something light for the evening").
-3. Pista replies with a short intro and a few **recommended items**, each with a one-line reason ("↳ why") such as "just 120 kcal" or "100% plant-based".
+3. Shoku replies with a short intro and a few **recommended items**, each with a one-line reason ("↳ why") such as "just 120 kcal" or "100% plant-based".
 4. Tap an item to view it, or tap the **+** to add it straight to your bag.
 
 The assistant understands mood, time of day and cravings, and matches them to items based on tags and nutrition.
@@ -124,7 +124,7 @@ Open your **Bag**, review the items, then continue to **Checkout**. On the check
 
 1. **Choose how you'd like it** — Pickup, Dine-in or Delivery. (If you arrived by scanning a table QR, this is fixed to Dine-in at your table.)
 2. **Pickup/Delivery time** — ASAP (about 12 minutes) or schedule; the café address is shown.
-3. **Payment** — choose UPI (GPay / PhonePe), card or Pista Wallet.
+3. **Payment** — choose UPI (GPay / PhonePe), card or Shoku Wallet.
 4. **Redeem points** — if you have enough points, pick a reward (a ₹ discount or a free item). Rewards you can't yet afford appear dimmed.
 5. **Promo code** — type a code (for example WELCOME10) and tap **Apply**; valid codes show the percentage off.
 6. Review the bill: subtotal, taxes & charges, an AI loyalty reward credit, any promo discount and any redeemed reward, then the **Total**.
@@ -161,11 +161,13 @@ The **Account** tab shows your name and email, your Points / Orders / Tier stats
 
 ## 4. For café owners & staff — the admin console
 
-The admin console lives at `/admin`. Sign in with the owner or staff account the Pista team created for you. On desktop there's a left sidebar; on mobile the same sections appear as a scrollable strip of tabs at the top. A **View store** link lets you jump to your live customer app at any time.
+The admin console lives at `/admin`. Sign in with the owner or staff account the Shoku team created for you. On desktop there's a left sidebar; on mobile the same sections appear as a scrollable strip of tabs at the top. A **View store** link lets you jump to your live customer app at any time.
 
 The navigation has these sections:
 
-**Overview · Orders · Menu · Tables · Customers · Feedback · Discounts · Loyalty · Marketing · Banners · Branding · Settings**
+**Overview · POS Billing · Orders · Analytics · Menu · Tables · Customers · Feedback · Discounts · Loyalty · Marketing · Banners · Branding · Settings**
+
+> **POS Billing** and some AI features are add-ons. If you don't see **POS Billing**, or a feature says it isn't enabled, contact the Shoku team to turn it on for your plan.
 
 ### 4.1 Overview
 Your live dashboard. At a glance:
@@ -186,8 +188,41 @@ Track and advance every order.
 
 Order statuses in plain terms: *Preparing* (being made), *Ready* (waiting for the customer), *Completed* (handed over / finished), *Cancelled* (not fulfilled).
 
+### 4.2a POS Billing (add-on)
+Ring up walk-in customers at the counter — the same system your online orders flow into, so your sales, stock of top-sellers and GST all live in one place.
+
+**Taking a sale:**
+1. Open **POS Billing**. The left side is your menu as tappable cards (with a search box — press **/** to jump to it — and category chips). The right side is the current sale ("ticket").
+2. Tap items to add them; use the **− / +** steppers on each ticket line to change quantities.
+3. (Optional) Type the customer's **phone number** to link the sale to their loyalty account — they earn points on counter purchases just like online. Leave it blank for an anonymous walk-in.
+4. (Optional) Enter a **promo code**.
+5. Choose the payment method — **Cash / UPI / Card**.
+6. Tap **Bill**. Shoku assigns a sequential GST invoice number (e.g. `INV-2026-00042`), opens the **customer invoice** to print, and — if enabled — a **kitchen ticket (KOT)** to your kitchen printer.
+
+**Printing:** invoices and KOTs are formatted for 80 mm thermal printers. Your browser's print dialog opens automatically; pick your receipt printer once and it remembers. A **KOT** lists just the items and quantities (no prices) in large type for the kitchen.
+
+**Recent bills / reprint:** the ticket panel lists your last few bills — tap **Reprint** to print any invoice again.
+
+**Day-end (Z) report:** the **Day-end report** button (top-right of POS) shows one day's totals — gross sales, number of bills, average bill, GST collected, a payment-method split, POS-vs-online mix, and top items. Pick any date, **Print** it, or export **CSV** for your accountant. Run it at close every day.
+
+### 4.2b Analytics
+A visual read on how the café is doing. Use the **7d / 30d / 90d** switch (top-right) to change the window.
+
+- **KPI tiles:** Revenue, Orders, Average order, and Trend (this half of the period vs the previous half).
+- **Revenue by day** — spot your best and worst days.
+- **Orders by hour** — see your real rush hours so you can staff for them.
+- **Counter vs online** — the revenue split between POS and app orders, plus a Cash/UPI/Card breakdown.
+- **Top items** — your best sellers by quantity.
+- **Revenue by location** — if you run more than one outlet (see Settings → Locations), revenue is split per outlet.
+
 ### 4.3 Menu management
 Add, edit, publish and remove items.
+
+**Bulk import from a spreadsheet (fastest way to load a menu):** tap **⬆ Import CSV**.
+- **Download template** gives you a ready-made CSV with the right columns: `name, category, price, desc, veg, kcal, caffeine, tags, signature` (only **name** and **price** are required).
+- Upload your file (or paste rows). You'll see a preview of what will be imported.
+- **Images are handled for you** — Shoku matches each item to a professional food photo automatically, so you don't have to find or upload a picture for every item. If your plan includes **AI images**, tick *Generate AI images* to have unique photos generated instead (this is slower; it falls back to the matched stock photo if AI isn't available).
+- Tap **Import**. Existing items with the same name are updated; new ones are added. Any rows with problems are listed so you can fix them.
 
 - The table lists every item with its photo, name, category, price and a **Live** toggle. Flip **Live** on to show an item in the customer app, or off to hide it without deleting it.
 - **Add an item:** tap **+ Add item**, then fill in the form:
@@ -246,7 +281,7 @@ Reach loyal customers with personalized, AI-drafted WhatsApp messages. A badge a
 
 **Compose**
 
-1. **AI quick-start:** tap a goal chip (✨ Win back lapsed customers, Nudge toward a reward, Thank loyal regulars, Announce an offer, New menu / seasonal drop). Pista drafts a message for you and pre-selects a sensible audience.
+1. **AI quick-start:** tap a goal chip (✨ Win back lapsed customers, Nudge toward a reward, Thank loyal regulars, Announce an offer, New menu / seasonal drop). Shoku drafts a message for you and pre-selects a sensible audience.
 2. **Campaign name:** give it a label (for example "Weekend win-back").
 3. **Audience (segment):** choose who to target. Each shows a live count of opted-in people:
    - **All opted-in** — everyone who allows WhatsApp.
@@ -272,7 +307,7 @@ Reach loyal customers with personalized, AI-drafted WhatsApp messages. A badge a
 
 **Automated messages your café can send:**
 - **Order triggers** — when *Auto order updates* is on, customers who opted in get an automatic WhatsApp order confirmation (with their order number, total, where it's served and points earned).
-- **Loyalty nudges** — when *Loyalty nudges* is on, Pista periodically messages customers who are very close to a reward (within ~60 points) or who have lapsed (no order in 30–60 days, offered a small win-back discount). Customers aren't messaged more than once a week by nudges.
+- **Loyalty nudges** — when *Loyalty nudges* is on, Shoku periodically messages customers who are very close to a reward (within ~60 points) or who have lapsed (no order in 30–60 days, offered a small win-back discount). Customers aren't messaged more than once a week by nudges.
 
 ### 4.10 Banners (sale banners)
 Promo banners shown at the top of your live menu app.
@@ -290,13 +325,14 @@ Make the customer app yours — changes preview live.
 - **Identity:** Brand name, Subdomain, Primary colour, Heading / dark colour.
 - **Typeface:** choose Inter, Poppins, Playfair or DM Sans.
 - A **Live preview** panel shows a mini storefront updating as you change colours and fonts.
-- **Reset to Pista defaults** restores the standard look.
+- **Reset to Shoku defaults** restores the standard look.
 - Tap **Publish changes** to apply to your live app (confirms with "Published ✓"). Colours re-theme the whole app instantly.
 
 ### 4.12 Settings
-Store details and AI feature switches.
+Store details, locations and AI feature switches.
 
 - **Store:** Store name and Address (these appear in the customer app and on order confirmations). It also shows your read-only Subdomain and Currency (INR ₹).
+- **Locations:** If you run more than one outlet, add each one here with a short **label** (e.g. "Indiranagar") and address. When you have two or more, a **location picker** appears in your customer app's header so diners choose which outlet they're ordering from, and your **Analytics** splits revenue by location. Add with **+ Add location**; remove with the **✕** button. Remember to **Save changes**.
 - **AI features** (toggle on/off):
   - **AI ordering assistant** — the chat "what should I eat" recommendations.
   - **Food intelligence cards** — auto origin, ingredients, allergens & nutrition.
@@ -306,12 +342,12 @@ Store details and AI feature switches.
 
 ---
 
-## 5. For the Pista platform team — the super-admin console
+## 5. For the Shoku platform team — the super-admin console
 
-The platform console lives at `/super` and is for Pista staff only. Its dark sidebar has four areas: **Analytics · Cafés · Audit log · Pitch deck**.
+The platform console lives at `/super` and is for Shoku staff only. Its dark sidebar has four areas: **Analytics · Cafés · Audit log · Pitch deck**.
 
 ### 5.1 Analytics (platform overview)
-An AI-assisted overview across all cafés on Pista.
+An AI-assisted overview across all cafés on Shoku.
 
 - **KPI cards:** **MRR** (with ARR), **Cafés** (active and trial counts), **Order revenue** (with total orders), **Customers**.
 - **AI insights — what changed & why:** 3–4 plain-language bullets summarising the month — revenue movement, MRR, new cafés, at-risk accounts and the forecast. A badge marks whether the summary was AI-written or auto-generated.
@@ -334,11 +370,22 @@ The full list of café tenants with subdomain, plan, item count, orders, revenue
 
 **Manage status:** in the table, **Suspend** an active café (its storefront then shows "Store unavailable" to customers) or **Activate** a suspended one. Status badges show active (green), suspended (red) or trial (amber).
 
+**Manage a café (plan, add-ons & AI):** tap **Manage** on any row to open its configuration drawer.
+- **Plan** — move the café between Starter / Growth / Enterprise. The plan sets the default AI model.
+- **POS add-on** — tick to enable **POS Billing** for the café (the ₹1,499/mo counter-billing module). Until this is on, the café's POS screen shows a "not enabled" message.
+- **AI provider** — by default a café uses the platform's shared AI key and the default model for its plan (Starter/Growth → `gpt-4o-mini`, Enterprise → `gpt-4o`). To bill AI usage to a café's own account, or to use a different provider:
+  - **API key** — paste the café's key (stored write-only; the field shows "••••••" once set — type to replace, or use **Clear café key** to revert to the platform default).
+  - **Model override** — pin a specific model (e.g. a newer or cheaper one) for that café.
+  - **Base URL** — point at any OpenAI-compatible endpoint (Azure OpenAI, a local gateway, etc.).
+- Tap **Save**.
+
+> **Why this matters for plans:** enterprise cafés can be given a stronger model and their own billing; starter cafés share the economical default. This is how AI cost scales with what each café pays.
+
 ### 5.3 Audit log
 A chronological record of platform actions, most recent first — café creation, campaign sends, suspensions, logins and the like. Each entry shows who did it (actor email), the action, the target and a relative timestamp.
 
 ### 5.4 Pitch deck (view / download / upload new version)
-A hosted investor pitch deck at `/pitch` (Pista's own story — problem, solution, product, market, business model, financials and the ask).
+A hosted investor pitch deck at `/pitch` (Shoku's own story — problem, solution, product, market, business model, financials and the ask).
 
 - Anyone with the link can **View PDF**, **Download PDF** or **Print** the deck.
 - Super-admins additionally see admin controls to **Upload PDF** or **Upload .pptx** and download the **Source .pptx**. Uploading a new file bumps the version (for example "v2") and stamps who updated it and when, so the latest deck is always served from the public link.
@@ -385,7 +432,7 @@ Note: customers consent to WhatsApp by default when they sign up; the system onl
 ## 7. FAQs & troubleshooting
 
 **My café's storefront shows no menu / "Store unavailable."**
-- If you see "Store unavailable", the café has been **suspended** by the Pista team — contact Pista to reactivate it (super-admins can flip it back to Active under **Cafés**).
+- If you see "Store unavailable", the café has been **suspended** by the Shoku team — contact Shoku to reactivate it (super-admins can flip it back to Active under **Cafés**).
 - If items are simply missing, check **Admin → Menu**: each item has a **Live** toggle; only live items show to customers. New cafés provisioned without the "Pre-load a starter menu" option start empty — add items, then toggle them Live.
 
 **WhatsApp says "Demo mode."**
@@ -415,8 +462,8 @@ Note: customers consent to WhatsApp by default when they sign up; the system onl
 **Which AI features can I turn off?**
 - In **Admin → Settings → AI features** you can independently toggle the AI ordering assistant, food intelligence cards, smart upsell & pairings, and AI loyalty rewards.
 
-**Does Pista need an external AI service to work?**
-- No. All AI features (assistant recommendations, marketing copy, platform insights) work out of the box using built-in logic, and automatically use a more advanced language model if the Pista team has connected one.
+**Does Shoku need an external AI service to work?**
+- No. All AI features (assistant recommendations, marketing copy, platform insights) work out of the box using built-in logic, and automatically use a more advanced language model if the Shoku team has connected one.
 
 ---
 
@@ -430,25 +477,25 @@ Note: customers consent to WhatsApp by default when they sign up; the system onl
 - **BSP** — Business Solution Provider; an Indian WhatsApp messaging partner (for example AiSensy, Interakt, Gupshup).
 - **Demo mode** — WhatsApp messaging that personalizes and logs messages without actually sending them; the default before a café connects a provider.
 - **Earn rate** — points a customer earns per ₹100 of an order's subtotal.
-- **Food intelligence** — Pista's per-item origin, ingredients, allergens and nutrition shown in the "Know your cup" panel.
+- **Food intelligence** — Shoku's per-item origin, ingredients, allergens and nutrition shown in the "Know your cup" panel.
 - **Fulfilment** — how an order is served: Pickup, Dine-in or Delivery.
 - **Live (item)** — an item published and visible in the customer app.
 - **Loyalty nudge** — an automated WhatsApp reminder to customers close to a reward or who have lapsed.
 - **MRR** — Monthly Recurring Revenue; the sum of active cafés' plan subscriptions.
 - **Owner / Staff** — café roles with access to the admin console.
-- **Pista AI** — the customer-facing AI ordering assistant.
+- **Shoku AI** — the customer-facing AI ordering assistant.
 - **Plan** — a café's subscription tier: Starter, Growth or Enterprise.
 - **Points** — loyalty currency customers earn and spend on rewards.
 - **Provider** — the WhatsApp service a café connects to send live messages (Meta Cloud, Twilio or Indian BSP).
 - **Reward** — a redeemable perk costing points: a ₹ discount or a free item.
 - **Segment** — a defined audience for marketing (All opted-in, Loyal regulars, Gold & above, Close to a reward, Lapsed, New customers).
-- **Subdomain** — the café's unique web address prefix (for example `your-cafe` in `your-cafe.pista.maplestudios.co.in`).
-- **Super-admin** — the Pista platform team, who manage every café from the `/super` console.
+- **Subdomain** — the café's unique web address prefix (for example `your-cafe` in `your-cafe.getshoku.com`).
+- **Super-admin** — the Shoku platform team, who manage every café from the `/super` console.
 - **Tenant** — one café on the platform, with its own storefront, data and branding.
 - **Tier** — a named loyalty level (Member, Silver, Gold, Platinum) with a minimum-points threshold.
 - **Trigger** — an automated order-related WhatsApp message (confirmation / ready alert).
-- **White-label** — each café's app is branded as its own, not as Pista.
+- **White-label** — each café's app is branded as its own, not as Shoku.
 
 ---
 
-*Powered by Pista — the AI white-label ordering platform.*
+*Powered by Shoku — the AI white-label ordering platform.*
