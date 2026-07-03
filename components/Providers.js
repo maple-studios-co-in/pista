@@ -20,6 +20,7 @@ function CartProvider({ children }) {
   const [lines, setLines] = useState([]);
   const [ready, setReady] = useState(false);
   const [table, setTableState] = useState(null);
+  const [location, setLocationState] = useState(null); // {id,label} — chosen store outlet
 
   useEffect(() => {
     try {
@@ -27,9 +28,19 @@ function CartProvider({ children }) {
       if (saved) setLines(JSON.parse(saved));
       const t = localStorage.getItem("shoku.table");
       if (t) setTableState(JSON.parse(t));
+      const l = localStorage.getItem("shoku.location");
+      if (l) setLocationState(JSON.parse(l));
     } catch {}
     setReady(true);
   }, []);
+
+  function setLocation(l) {
+    setLocationState(l);
+    try {
+      if (l) localStorage.setItem("shoku.location", JSON.stringify(l));
+      else localStorage.removeItem("shoku.location");
+    } catch {}
+  }
 
   function setTable(t) {
     setTableState(t);
@@ -83,7 +94,7 @@ function CartProvider({ children }) {
   const subtotal = lines.reduce((s, l) => s + l.unit * l.qty, 0);
 
   return (
-    <CartCtx.Provider value={{ lines, add, dec, setQty, clear, qtyOf, count, subtotal, ready, table, setTable }}>
+    <CartCtx.Provider value={{ lines, add, dec, setQty, clear, qtyOf, count, subtotal, ready, table, setTable, location, setLocation }}>
       {children}
     </CartCtx.Provider>
   );

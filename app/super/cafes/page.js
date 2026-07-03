@@ -12,6 +12,7 @@ export default function CafesPage() {
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
   const [invite, setInvite] = useState(null);
+  const [managing, setManaging] = useState(null); // tenant row being configured
 
   function load() {
     fetch("/api/super/tenants").then((r) => (r.ok ? r.json() : [])).then(setRows).catch(() => {});
@@ -47,6 +48,13 @@ export default function CafesPage() {
   async function setStatus(t, status) {
     setRows((arr) => arr.map((x) => (x.id === t.id ? { ...x, status } : x)));
     await fetch(`/api/super/tenants/${t.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }) });
+  }
+
+  async function saveManage(patch) {
+    setSaving(true);
+    const res = await fetch(`/api/super/tenants/${managing.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(patch) });
+    setSaving(false);
+    if (res.ok) { setManaging(null); load(); }
   }
 
   return (
@@ -88,11 +96,14 @@ export default function CafesPage() {
                     <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold capitalize ${t.status === "active" ? "bg-green-50 text-green-700" : t.status === "suspended" ? "bg-red-50 text-red-600" : "bg-amber-50 text-amber-700"}`}>{t.status}</span>
                   </td>
                   <td className="px-5 py-3">
-                    {t.status === "suspended" ? (
-                      <button onClick={() => setStatus(t, "active")} className="rounded-lg border border-line px-3 py-1.5 text-[12px] font-bold">Activate</button>
-                    ) : (
-                      <button onClick={() => setStatus(t, "suspended")} className="rounded-lg px-3 py-1.5 text-[12px] font-bold text-red-500">Suspend</button>
-                    )}
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => setManaging(t)} className="rounded-lg border border-line px-3 py-1.5 text-[12px] font-bold">Manage</button>
+                      {t.status === "suspended" ? (
+                        <button onClick={() => setStatus(t, "active")} className="rounded-lg border border-line px-3 py-1.5 text-[12px] font-bold">Activate</button>
+                      ) : (
+                        <button onClick={() => setStatus(t, "suspended")} className="rounded-lg px-3 py-1.5 text-[12px] font-bold text-red-500">Suspend</button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -147,6 +158,8 @@ export default function CafesPage() {
         </div>
       )}
 
+      {managing && <ManageDrawer t={managing} saving={saving} onClose={() => setManaging(null)} onSave={saveManage} />}
+
       {invite && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6" onClick={() => setInvite(null)}>
           <div className="w-full max-w-md rounded-3xl bg-white p-6" onClick={(e) => e.stopPropagation()}>
@@ -171,6 +184,75 @@ function F({ label, children, full }) {
     <div className={full ? "sm:col-span-2" : ""}>
       <label className="mb-1 block text-[12px] font-semibold text-ink/70">{label}</label>
       {children}
+    </div>
+  );
+}
+
+const PLAN_DEFAULT_MODEL = { starter: "gpt-4o-mini", growth: "gpt-4o-mini", enterprise: "gpt-4o" };
+
+// Per-café control: plan, POS add-on, and AI provider (key/model/base URL).
+function ManageDrawer({ t, saving, onClose, onSave }) {
+  const [plan, setPlan] = useState(t.plan);
+  const [pos, setPos] = useState(!!t.posEnabled);
+  const [model, setModel] = useState(t.aiModel || "");
+  const [baseUrl, setBaseUrl] = useState(t.aiBaseUrl || "");
+  const [apiKey, setApiKey] = useState(""); // write-only; blank = leave unchanged
+
+  const submit = () => {
+    const patch = { plan, posEnabled: pos, aiModel: model, aiBaseUrl: baseUrl };
+    if (apiKey.trim()) patch.aiApiKey = apiKey.trim();
+    onSave(patch);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-6" onClick={onClose}>
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-3xl bg-white p-6 sm:rounded-3xl" onClick={(e) => e.stopPropagation()}>
+        <h2 className="text-lg font-bold">{t.name}</h2>
+        <p className="mt-1 text-[12px] text-muted">Plan, add-ons and AI configuration for this café.</p>
+
+        <div className="mt-4 grid gap-4">
+          <div>
+            <h3 className="mb-2 text-[12px] font-bold uppercase tracking-wide text-muted">Plan &amp; add-ons</h3>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <F label="Plan">
+                <select className={inp} value={plan} onChange={(e) => setPlan(e.target.value)}>
+                  <option value="starter">Starter</option><option value="growth">Growth</option><option value="enterprise">Enterprise</option>
+                </select>
+              </F>
+              <label className="flex items-center gap-2 self-end pb-1 text-[13px] font-semibold">
+                <input type="checkbox" checked={pos} onChange={(e) => setPos(e.target.checked)} /> POS add-on (₹1,499/mo)
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="mb-1 text-[12px] font-bold uppercase tracking-wide text-muted">AI provider</h3>
+            <p className="mb-2 text-[12px] text-muted">Leave blank to use the platform default for the <b className="capitalize">{plan}</b> plan (<code>{PLAN_DEFAULT_MODEL[plan]}</code>). Set a café-specific key to bill AI to their own account.</p>
+            <div className="grid gap-3">
+              <F label="API key">
+                <input className={inp} type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)}
+                  placeholder={t.aiKeySet ? "•••••• (set — type to replace)" : "sk-…  (optional)"} />
+              </F>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <F label="Model override">
+                  <input className={inp} value={model} onChange={(e) => setModel(e.target.value)} placeholder={PLAN_DEFAULT_MODEL[plan]} />
+                </F>
+                <F label="Base URL (OpenAI-compatible)">
+                  <input className={inp} value={baseUrl} onChange={(e) => setBaseUrl(e.target.value)} placeholder="https://api.openai.com/v1" />
+                </F>
+              </div>
+              {t.aiKeySet && (
+                <button onClick={() => onSave({ aiApiKey: "" })} className="justify-self-start text-[12px] font-bold text-red-500">Clear café key (revert to platform default)</button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 flex gap-3">
+          <button onClick={submit} disabled={saving} className="flex-1 rounded-xl bg-brand py-3 text-[14px] font-bold text-white disabled:opacity-50">{saving ? "Saving…" : "Save"}</button>
+          <button onClick={onClose} className="rounded-xl border border-line px-5 py-3 text-[14px] font-semibold">Cancel</button>
+        </div>
+      </div>
     </div>
   );
 }

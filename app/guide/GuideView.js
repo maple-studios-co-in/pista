@@ -3,9 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 
-export default function GuideView({ userHtml, devHtml }) {
+export default function GuideView({ userHtml, devHtml, demoHtml }) {
   const [tab, setTab] = useState("user");
-  const html = tab === "dev" && devHtml ? devHtml : userHtml;
+  const html = tab === "dev" && devHtml ? devHtml : tab === "demo" && demoHtml ? demoHtml : userHtml;
 
   return (
     <div className="guide">
@@ -13,6 +13,7 @@ export default function GuideView({ userHtml, devHtml }) {
         <Link href="/" className="brand"><img src="/shoku-mark.svg" alt="" className="dot" /> Shoku</Link>
         <div className="tabs">
           <button className={tab === "user" ? "on" : ""} onClick={() => setTab("user")}>For café owners</button>
+          {demoHtml && <button className={tab === "demo" ? "on" : ""} onClick={() => setTab("demo")}>Demo playbook</button>}
           {devHtml && <button className={tab === "dev" ? "on" : ""} onClick={() => setTab("dev")}>For developers</button>}
         </div>
         <div className="spacer" />

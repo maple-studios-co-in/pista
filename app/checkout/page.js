@@ -22,7 +22,7 @@ const PAYMENTS = [
 export default function CheckoutPage() {
   const router = useRouter();
   const { status } = useSession();
-  const { lines, subtotal, clear, table } = useCart();
+  const { lines, subtotal, clear, table, location } = useCart();
   const { brand } = useBrand();
   const [ful, setFul] = useState("pickup");
   const [pay, setPay] = useState("upi");
@@ -137,7 +137,7 @@ export default function CheckoutPage() {
     if (!lines.length || placing) return;
     setPlacing(true);
     setError("");
-    const payload = { lines, fulfilment: ful, payment: pay, discountCode: applied?.code || null, rewardId: redeem?.id || null, tableId: table?.id || null };
+    const payload = { lines, fulfilment: ful, payment: pay, discountCode: applied?.code || null, rewardId: redeem?.id || null, tableId: table?.id || null, locationLabel: location?.label || null };
     try {
       // Try the real gateway; if it isn't configured (503), use direct checkout.
       const rz = await fetch("/api/payments/razorpay/order", {

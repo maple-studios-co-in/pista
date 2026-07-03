@@ -1,8 +1,8 @@
-# Pista — Developer Guide
+# Shoku — Developer Guide
 
-**Pista** is an AI-powered, white-label, multi-tenant online ordering platform for cafés and restaurant chains. One Next.js application serves three audiences off a single shared database: the **platform** (Pista's marketing site + super-admin), each **café storefront** (a branded ordering app on its own subdomain), and each café's **admin dashboard**.
+**Shoku** is an AI-powered, white-label, multi-tenant online ordering platform for cafés and restaurant chains. One Next.js application serves three audiences off a single shared database: the **platform** (Shoku's marketing site + super-admin), each **café storefront** (a branded ordering app on its own subdomain), and each café's **admin dashboard**.
 
-This guide documents the system as it actually exists in the codebase. App root: `pista/`.
+This guide documents the system as it actually exists in the codebase. App root: `shoku/`.
 
 - **Framework:** Next.js 14 (App Router) + React 18
 - **Database:** Prisma ORM over SQLite
@@ -24,20 +24,20 @@ This guide documents the system as it actually exists in the codebase. App root:
 8. [Environment variables](#8-environment-variables)
 9. [Local setup & development](#9-local-setup--development)
 10. [Deployment](#10-deployment)
-11. [Extending Pista](#11-extending-pista)
+11. [Extending Shoku](#11-extending-shoku)
 12. [Conventions & gotchas](#12-conventions--gotchas)
 
 ---
 
 ## 1. Architecture overview
 
-Pista is a single Next.js 14 App Router application. Hostname determines which of the three surfaces a request hits:
+Shoku is a single Next.js 14 App Router application. Hostname determines which of the three surfaces a request hits:
 
 | Surface | Host | Audience | What it serves |
 | --- | --- | --- | --- |
-| **Platform / super-admin** | apex `pista.…` (+ `www`) | Pista staff | Marketing landing, `/super` console, platform analytics, pitch deck |
-| **Café storefront** | `<slug>.pista.…` | Diners | Branded menu, AI assistant, cart, checkout, loyalty, account |
-| **Café admin** | `<slug>.pista.…/admin` | Café owner/staff | Menu, orders, customers, marketing, loyalty, branding, settings |
+| **Platform / super-admin** | apex `shoku.…` (+ `www`) | Shoku staff | Marketing landing, `/super` console, platform analytics, pitch deck |
+| **Café storefront** | `<slug>.shoku.…` | Diners | Branded menu, AI assistant, cart, checkout, loyalty, account |
+| **Café admin** | `<slug>.shoku.…/admin` | Café owner/staff | Menu, orders, customers, marketing, loyalty, branding, settings |
 
 ### Request lifecycle
 
@@ -66,7 +66,7 @@ The whole platform runs from one SQLite file. This keeps provisioning trivial (c
 ## 2. Project structure
 
 ```
-pista/
+shoku/
 ├── middleware.js              # subdomain → x-tenant-slug header; "/" → "/menu" rewrite on café hosts
 ├── prisma/
 │   ├── schema.prisma          # full data model
@@ -96,7 +96,7 @@ pista/
 │   ├── super/                 # super-admin console (cafes, audit) + layout
 │   └── api/                   # all route handlers (see §7)
 ├── components/                # AppShell, Header, BottomNav, CartBar, ProductCard, AdminUI, Providers
-├── scripts/                   # deploy.sh, update.sh, add-cafe.sh, nginx-pista-wildcard.conf
+├── scripts/                   # deploy.sh, update.sh, add-cafe.sh, nginx-shoku-wildcard.conf
 ├── package.json
 └── docs: README.md, DEPLOY.md, DEPLOY_HOSTINGER.md, SUBDOMAINS.md, WILDCARD_TLS.md, GIT_SETUP.md, MULTI_TENANT_PLAN.md
 ```
@@ -344,7 +344,7 @@ server component / route handler  ──►  getCurrentTenant()  (lib/tenant.js)
 
 `lib/tenant.js` exports the pieces:
 
-- **`BASE_DOMAIN`** — `process.env.BASE_DOMAIN || "pista.maplestudios.co.in"`.
+- **`BASE_DOMAIN`** — `process.env.BASE_DOMAIN || "getshoku.com"`.
 - **`DEFAULT_TENANT_SLUG`** — `process.env.DEFAULT_TENANT_SLUG || "cbtl"`. The fallback café for apex/localhost/unknown hosts.
 - **`RESERVED`** — `www, console, admin, api, app, mail, assets, static, super` — subdomains that never map to a café.
 - **`slugFromHost(host)`** — returns the café slug for `<slug>.BASE_DOMAIN`, or `null` for apex, `www`, `localhost`, raw IPs, reserved labels, and unknown domains.
@@ -363,7 +363,7 @@ Passwords are bcrypt-compared. On success the provider returns `{ id, name, emai
 
 ### Cross-subdomain cookies
 
-By default NextAuth uses host-only cookies, so a login at `cbtl.pista.…` would not carry to `bluetokai.pista.…` (which is correct — cafés are isolated). But the **same café** must work across its own host plus any shared surfaces, and a deployment may want one session domain. Setting **`COOKIE_DOMAIN`** (e.g. `.pista.maplestudios.co.in`) switches `auth.js` into cross-subdomain mode: it sets `useSecureCookies: true` and pins the session/callback/csrf cookies to that parent domain with `secure: true`. Leave it **unset** for local dev / single-host (NextAuth host-only defaults).
+By default NextAuth uses host-only cookies, so a login at `cbtl.shoku.…` would not carry to `bluetokai.shoku.…` (which is correct — cafés are isolated). But the **same café** must work across its own host plus any shared surfaces, and a deployment may want one session domain. Setting **`COOKIE_DOMAIN`** (e.g. `.getshoku.com`) switches `auth.js` into cross-subdomain mode: it sets `useSecureCookies: true` and pins the session/callback/csrf cookies to that parent domain with `secure: true`. Leave it **unset** for local dev / single-host (NextAuth host-only defaults).
 
 ### Authorization gates (`lib/admin.js`)
 
@@ -387,7 +387,7 @@ There is no automatic row-level security — isolation is **manual and consisten
 
 ## 5. The AI layer
 
-Pista's AI is **heuristic-first and LLM-optional**. Every AI feature ships a built-in, deterministic implementation that works with **zero external dependencies**, and **upgrades automatically** to a real model the moment an API key is present. There is no hard dependency on any AI provider.
+Shoku's AI is **heuristic-first and LLM-optional**. Every AI feature ships a built-in, deterministic implementation that works with **zero external dependencies**, and **upgrades automatically** to a real model the moment an API key is present. There is no hard dependency on any AI provider.
 
 ### The optional LLM bridge — `lib/llm.js`
 
@@ -589,11 +589,11 @@ Copy `.env.example` → `.env` and fill in real values. Never commit `.env`.
 | --- | --- | --- |
 | `DATABASE_URL` | **Yes** | Prisma datasource. Local: `file:./dev.db`. (Schema provider is `sqlite`.) |
 | `NEXTAUTH_SECRET` | **Yes** (prod) | Signs the JWT session. `openssl rand -base64 32`. |
-| `NEXTAUTH_URL` | **Yes** (prod) | Canonical app URL, e.g. `https://pista.maplestudios.co.in`. |
-| `BASE_DOMAIN` | Recommended | Apex domain used by middleware/auth to parse `<slug>.BASE_DOMAIN`. Default `pista.maplestudios.co.in`. |
+| `NEXTAUTH_URL` | **Yes** (prod) | Canonical app URL, e.g. `https://getshoku.com`. |
+| `BASE_DOMAIN` | Recommended | Apex domain used by middleware/auth to parse `<slug>.BASE_DOMAIN`. Default `getshoku.com`. |
 | `NEXT_PUBLIC_BASE_DOMAIN` | Recommended | Same value, exposed to the client for building café URLs in the UI. |
 | `DEFAULT_TENANT_SLUG` | Optional | Fallback café for apex/localhost/unknown hosts. Default `cbtl`. |
-| `COOKIE_DOMAIN` | Prod only | Set to `.pista.maplestudios.co.in` to share the login session across café subdomains. Leave **unset** locally (NextAuth host-only defaults). |
+| `COOKIE_DOMAIN` | Prod only | Set to `.getshoku.com` to share the login session across café subdomains. Leave **unset** locally (NextAuth host-only defaults). |
 | `OPENAI_API_KEY` | Optional | Enables LLM upgrades for `aiInsights` + `aiMessage`. |
 | `LLM_API_KEY` | Optional | Alternative to `OPENAI_API_KEY` (checked second). |
 | `LLM_BASE_URL` | Optional | OpenAI-compatible base URL. Default `https://api.openai.com/v1`. |
@@ -607,7 +607,7 @@ Without any LLM variable, all AI features run on their built-in heuristics.
 ## 9. Local setup & development
 
 ```bash
-cd pista
+cd shoku
 npm install          # also runs `prisma generate` (postinstall)
 npm run setup        # prisma db push  +  node prisma/seed.js
 npm run dev          # http://localhost:3000
@@ -624,12 +624,12 @@ npm run seed         # node prisma/seed.js
 
 | Login | Role | Where |
 | --- | --- | --- |
-| `super@pista.app` | superadmin | apex host → `/super` |
-| `demo@pista.app` | owner (CBTL) | `cbtl` café → `/admin` |
+| `super@shoku.app` | superadmin | apex host → `/super` |
+| `demo@shoku.app` | owner (CBTL) | `cbtl` café → `/admin` |
 | `owner@bluetokai.app` | owner (Blue Tokai) | `bluetokai` café |
 | `aarav@example.com`, `diya@example.com` | customers (CBTL) | storefront |
 
-The seed provisions a superadmin + two demo cafés (CBTL = default/enterprise, Blue Tokai = growth) with menus, banners, discounts (`WELCOME10`, `PISTA15`), rewards, tables, feedback, and ~14 days of synthetic orders.
+The seed provisions a superadmin + two demo cafés (CBTL = default/enterprise, Blue Tokai = growth) with menus, banners, discounts (`WELCOME10`, `SHOKU15`), rewards, tables, feedback, and ~14 days of synthetic orders.
 
 ### Local subdomains
 
@@ -674,13 +674,13 @@ Production runs the Next.js app behind **PM2 + Nginx** with **wildcard TLS** for
 | `scripts/deploy.sh` | First-time server provisioning. |
 | `scripts/update.sh` | Pull + redeploy: `git pull` → `npm ci` → ensure env vars → **back up `prisma/dev.db`** → `prisma db push --accept-data-loss` → run `migrate-to-multitenant.js` (idempotent) → `npm run build` → `pm2 restart`. |
 | `scripts/add-cafe.sh <slug>` | Per-café Nginx site + Certbot cert. **Only needed if you are not using wildcard TLS** — with `WILDCARD_TLS.md` set up, a café created in `/super` is instantly live with no per-café step. |
-| `scripts/nginx-pista-wildcard.conf` | The single wildcard Nginx server block. |
+| `scripts/nginx-shoku-wildcard.conf` | The single wildcard Nginx server block. |
 
-Typical redeploy: `./scripts/update.sh`. Two routing models exist — **wildcard TLS** (one cert, zero per-café steps; preferred) or **per-café** (`add-cafe.sh` per slug). Both require a wildcard DNS record `*.pista → <server-ip>`.
+Typical redeploy: `./scripts/update.sh`. Two routing models exist — **wildcard TLS** (one cert, zero per-café steps; preferred) or **per-café** (`add-cafe.sh` per slug). Both require a wildcard DNS record `*.shoku → <server-ip>`.
 
 ---
 
-## 11. Extending Pista
+## 11. Extending Shoku
 
 ### Add a café
 
