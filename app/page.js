@@ -327,7 +327,7 @@ export default function Landing() {
               <span className="fbadge b-tl">✦</span>
               <b>AI Recommendation</b>
               <div className="fc-media">
-                <img src="https://images.unsplash.com/photo-1568649929103-28ffbefaca1e?w=120&h=120&fit=crop" alt="" />
+                <img src="https://images.unsplash.com/photo-1536256263959-770b48d82b0a?w=200&h=200&fit=crop&q=80" alt="" />
                 <span className="fc-lines"><i className="fc-line" /><i className="fc-line short" /></span>
               </div>
             </div>
@@ -335,7 +335,7 @@ export default function Landing() {
             <div className="fcloud fc-c">
               <b>New on the Menu</b>
               <div className="fc-media">
-                <img src="https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=120&h=120&fit=crop" alt="" />
+                <img src="https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=200&h=200&fit=crop&crop=entropy&q=80" alt="" />
                 <span className="fc-lines"><i className="fc-line" /><i className="fc-line short" /></span>
               </div>
               <small className="clay">Rs 240</small>
@@ -690,17 +690,19 @@ export default function Landing() {
           box-shadow:0 16px 40px rgba(36,28,18,.10), 0 2px 8px rgba(36,28,18,.05); width:196px;
           display:flex; flex-direction:column; gap:8px; animation:floaty 6s ease-in-out infinite; }
         .lp .fcloud > b, .lp .fc-head b{ font-size:12.5px; font-weight:700; color:var(--ink); }
-        .lp .fc-a{ left:0; top:5%; animation-delay:0s; }
-        .lp .fc-c{ right:0; top:2%; width:200px; animation-delay:-3.2s; animation-duration:6.6s; }
-        .lp .fc-b{ left:-2%; top:47%; animation-delay:-1.7s; animation-duration:7.2s; }
-        .lp .fc-d{ right:-2%; top:52%; width:212px; animation-delay:-4.6s; animation-duration:7.6s; }
+        /* titles clear the overlapping corner badge */
+        .lp .fc-a > b, .lp .fc-b > b{ padding-left:24px; }
+        .lp .fc-a{ left:1%; top:5%; animation-delay:0s; }
+        .lp .fc-c{ right:1%; top:3%; width:200px; animation-delay:-3.2s; animation-duration:6.6s; }
+        .lp .fc-b{ left:-1%; top:48%; animation-delay:-1.7s; animation-duration:7.2s; }
+        .lp .fc-d{ right:0; top:54%; width:212px; animation-delay:-4.6s; animation-duration:7.6s; }
         @keyframes floaty{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-10px); } }
 
         /* dark-green circular badge overlapping the card corner */
-        .lp .fbadge{ position:absolute; width:46px; height:46px; border-radius:50%; background:var(--matcha-dd);
-          color:#f4f1ea; display:grid; place-items:center; font-size:18px; box-shadow:0 8px 20px rgba(21,40,30,.28); }
-        .lp .b-tl{ left:-18px; top:-18px; }
-        .lp .b-br{ right:-16px; bottom:-16px; font-size:16px; }
+        .lp .fbadge{ position:absolute; width:42px; height:42px; border-radius:50%; background:var(--matcha-dd);
+          color:#f4f1ea; display:grid; place-items:center; font-size:16px; box-shadow:0 8px 20px rgba(21,40,30,.28); }
+        .lp .b-tl{ left:-15px; top:-15px; }
+        .lp .b-br{ right:-13px; bottom:-13px; font-size:15px; }
 
         .lp .fc-media{ display:flex; gap:9px; align-items:center; }
         .lp .fc-media img{ width:46px; height:46px; border-radius:9px; object-fit:cover; flex-shrink:0; }
